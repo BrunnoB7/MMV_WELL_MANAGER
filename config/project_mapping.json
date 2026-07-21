@@ -1,0 +1,13 @@
+{
+    "task_id": "ID",
+    "task_name": "Task Name",
+    "start": "Start",
+    "finish": "Finish",
+    "duration": "Duration",
+    "progress": "% Complete",
+    "resource": "Resource Names",
+    "predecessor": "Predecessors",
+    "summary": "Summary",
+    "milestone": "Milestone",
+    "outline_level": "Outline Level"
+}
