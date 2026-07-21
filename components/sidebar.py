@@ -27,7 +27,7 @@ def show_sidebar():
             icons=[
                 "speedometer2",
                 "diagram-3",
-                "box-seam",
+                "clipboard-check",
                 "calendar3",
                 "folder",
                 # "people",
