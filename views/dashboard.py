@@ -318,7 +318,7 @@ def dashboard():
         f'<div class="days-remaining-number">{days_remaining}</div>'
         '<div class="days-remaining-label">dias restantes</div>'
         f'<div class="days-remaining-date">'
-        f'Término em {format_date(settings.get("end_date"))}'
+        f'Término em {format_date(settings.get('end_date'))}'
         '</div>'
         '</div>'
         f'<h1>🌱 {project_name}</h1>'
@@ -391,10 +391,10 @@ def dashboard():
 
     with c1:
         metric_card(
-            "Deliverables",
+            "Tarefass",
             kpis["total"],
             "Total cadastrado",
-            "📦",
+            "📋",
         )
 
     with c2:
