@@ -4,6 +4,7 @@ from pathlib import Path
 from database.database import initialize_database
 from views.deliverables import deliverables_page
 from components.sidebar import show_sidebar
+from components.database_backup import render_database_backup
 from views.dashboard import dashboard
 from views.cronograma import cronograma_page
 from views.documentos import documentos_page
