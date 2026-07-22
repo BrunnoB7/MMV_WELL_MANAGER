@@ -639,5 +639,5 @@ def dashboard():
 
     st.caption(
         "BECCS Baseline Manager © 2026 · "
-        "Dados atualizados automaticamente pelo SQLite"
+        "Bruno Santos"
     )
