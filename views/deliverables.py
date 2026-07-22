@@ -227,6 +227,12 @@ def deliverables_page():
 
     filtered = []
 
+    deliverables = sorted(deliverables,
+                          key=lambda item: (str(item.get("status") or "").strip().lower()
+                                            in {"concluído", "concluido"},
+                                            item.get("deadline") or "9999-12-31",
+                                            item.get("title") or "",),)
+
     for deliverable in deliverables:
         searchable = (
             f"{deliverable['title'] or ''} "
