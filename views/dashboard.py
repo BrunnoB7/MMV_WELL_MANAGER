@@ -284,10 +284,11 @@ def dashboard():
         settings.get("end_date")
     )
 
-    milestones = DashboardService.get_next_milestones()
+    in_progress_activities = (
+    DashboardService.get_in_progress_activities()
+)
     pending = DashboardService.get_critical_pending()
     priorities = DashboardService.get_priorities()
-    last_sync = DashboardService.get_last_sync()
 
     # =====================================================
     # CABEÇALHO
@@ -432,60 +433,96 @@ def dashboard():
     with esquerda:
         with st.container(border=True):
             st.markdown(
-                '<div class="section-title">'
-                "📅 Próximos marcos"
-                "</div>",
+                (
+                    '<div class="section-title">'
+                    "🚧 Atividades em andamento"
+                    "</div>"
+                ),
                 unsafe_allow_html=True,
             )
-
-            if milestones:
-                milestones_df = pd.DataFrame(milestones)
-
-                milestones_df["finish_date"] = (
-                    milestones_df["finish_date"]
+    
+            if in_progress_activities:
+                activities_df = pd.DataFrame(
+                    in_progress_activities
+                )
+    
+                activities_df["deadline"] = (
+                    activities_df["deadline"]
                     .apply(format_date)
                 )
-
-                milestones_df = milestones_df[
+    
+                activities_df["progress"] = (
+                    pd.to_numeric(
+                        activities_df["progress"],
+                        errors="coerce",
+                    )
+                    .fillna(0)
+                    .clip(0, 100)
+                    .astype(int)
+                )
+    
+                activities_df = activities_df[
                     [
-                        "task_name",
+                        "title",
                         "discipline",
-                        "finish_date",
                         "progress",
-                        "responsible",
+                        "manager",
+                        "deadline",
                     ]
                 ]
-
-                milestones_df.columns = [
-                    "Marco",
+    
+                activities_df.columns = [
+                    "Atividade",
                     "Disciplina",
-                    "Data",
                     "Progresso",
                     "Responsável",
+                    "Prazo",
                 ]
-
+    
                 st.dataframe(
-                    milestones_df,
+                    activities_df,
                     use_container_width=True,
                     hide_index=True,
                     column_config={
-                        "Progresso": st.column_config.ProgressColumn(
-                            "Progresso",
-                            min_value=0,
-                            max_value=100,
-                            format="%d%%",
-                        )
+                        "Atividade": st.column_config.TextColumn(
+                            "Atividade",
+                            width="large",
+                        ),
+                        "Disciplina": st.column_config.TextColumn(
+                            "Disciplina",
+                            width="medium",
+                        ),
+                        "Progresso": (
+                            st.column_config.ProgressColumn(
+                                "Progresso",
+                                min_value=0,
+                                max_value=100,
+                                format="%d%%",
+                            )
+                        ),
+                        "Responsável": (
+                            st.column_config.TextColumn(
+                                "Responsável",
+                                width="medium",
+                            )
+                        ),
+                        "Prazo": st.column_config.TextColumn(
+                            "Prazo",
+                            width="small",
+                        ),
                     },
                 )
+    
+                st.caption(
+                    f"{len(in_progress_activities)} "
+                    "atividade(s) em execução."
+                )
+    
             else:
                 st.info(
-                    "Nenhum marco futuro encontrado no cronograma."
+                    "Nenhuma atividade está com o status "
+                    "'Em andamento'."
                 )
-
-            st.caption(
-                f"Última sincronização do Project: "
-                f"{last_sync or 'Nunca'}"
-            )
 
     with direita:
         with st.container(border=True):
