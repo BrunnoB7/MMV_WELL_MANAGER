@@ -30,12 +30,143 @@ def validate_admin_password(password: str) -> bool:
     return password == expected_password
 
 
+def render_sync_indicator(
+    synchronization_status: dict,
+) -> None:
+    status = synchronization_status["status"]
+
+    if status == "synced":
+        dot_class = "sync-dot-green"
+        status_class = "sync-text-green"
+        title = "Banco sincronizado"
+        description = (
+            "O banco local é igual ao arquivo salvo "
+            "no GitHub."
+        )
+
+    elif status == "not_synced":
+        dot_class = "sync-dot-red"
+        status_class = "sync-text-red"
+        title = "Atualização necessária"
+        description = (
+            "Existem alterações locais que ainda não "
+            "foram enviadas ao GitHub."
+        )
+
+    elif status == "remote_missing":
+        dot_class = "sync-dot-red"
+        status_class = "sync-text-red"
+        title = "Backup não encontrado"
+        description = (
+            "O banco ainda não foi salvo no GitHub."
+        )
+
+    else:
+        dot_class = "sync-dot-red"
+        status_class = "sync-text-red"
+        title = "Banco indisponível"
+        description = (
+            "Não foi possível encontrar o banco local."
+        )
+
+    html = (
+        '<div class="database-sync-status">'
+        '<div class="database-sync-header">'
+        f'<span class="sync-dot {dot_class}"></span>'
+        f'<span class="{status_class}">{title}</span>'
+        '</div>'
+        f'<div class="database-sync-description">'
+        f'{description}'
+        '</div>'
+        '</div>'
+    )
+
+    st.markdown(
+        html,
+        unsafe_allow_html=True,
+    )
+
 def render_database_backup():
+
+    st.markdown(
+    """
+    <style>
+    .database-sync-status {
+        background: #F8F9FA;
+        border: 1px solid #E4E7EB;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+    }
+
+    .database-sync-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .sync-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .sync-dot-green {
+        background-color: #28A745;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.14);
+    }
+
+    .sync-dot-red {
+        background-color: #DC3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.14);
+    }
+
+    .sync-text-green {
+        color: #218838;
+    }
+
+    .sync-text-red {
+        color: #C82333;
+    }
+
+    .database-sync-description {
+        color: #6C757D;
+        font-size: 0.74rem;
+        line-height: 1.35;
+        margin-top: 5px;
+        padding-left: 18px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+    
     with st.sidebar.expander(
         "☁️ Atualizar banco de dados",
         expanded=False,
     ):
         st.markdown("#### Banco de dados")
+
+        try:
+            synchronization_status = (
+                GitHubBackupService
+                .get_synchronization_status()
+            )
+        
+            render_sync_indicator(
+                synchronization_status
+            )
+
+        except GitHubBackupError as error:
+            st.warning(
+                "Não foi possível verificar a sincronização."
+            )
+        
+            st.caption(str(error))
 
         database_info = (
             GitHubBackupService.get_local_database_info()
