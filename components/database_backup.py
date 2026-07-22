@@ -256,12 +256,12 @@ def render_database_backup():
                     "realizar o novo deploy."
                 )
 
-                if result["commit_url"]:
-                    st.link_button(
-                        "Ver commit no GitHub",
-                        result["commit_url"],
-                        use_container_width=True,
-                    )
+                # if result["commit_url"]:
+                #     st.link_button(
+                #         "Ver commit no GitHub",
+                #         result["commit_url"],
+                #         use_container_width=True,
+                #     )
 
             except GitHubBackupError as error:
                 st.error(str(error))
