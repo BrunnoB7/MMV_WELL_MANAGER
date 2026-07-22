@@ -174,6 +174,35 @@ class DeliverableRepository:
         return [row["discipline"] for row in rows]
 
     @staticmethod
+    def get_in_progress_activities():
+        query = """
+            SELECT
+                id,
+                title,
+                discipline,
+                progress,
+                manager,
+                deadline,
+                priority,
+                status
+            FROM deliverables
+            WHERE LOWER(TRIM(status)) = 'Em andamento'
+            ORDER BY
+                CASE
+                    WHEN deadline IS NULL OR deadline = '' THEN 1
+                    ELSE 0
+                END,
+                deadline ASC,
+                title ASC
+        """
+    
+        with get_connection() as connection:
+            cursor = connection.execute(query)
+            rows = cursor.fetchall()
+    
+        return [dict(row) for row in rows]
+    
+    @staticmethod
     def delete(deliverable_id):
 
         conn = get_connection()
