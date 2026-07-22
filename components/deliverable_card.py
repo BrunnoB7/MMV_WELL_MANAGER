@@ -191,7 +191,7 @@ def edit_deliverable_dialog(deliverable):
                     manager=manager,
                     priority=priority,
                     status=status,
-                    progress=progress,
+                    progress=100 if status == "Concluído" else progress,
                     deadline=deadline.isoformat(),
                     google_drive=google_drive,
                 )
