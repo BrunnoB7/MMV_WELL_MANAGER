@@ -28,9 +28,9 @@ st.markdown("""
     visibility: hidden;
 }
 
-/* Esconde o rodapé */
-footer {
-    visibility: hidden;
+/* Esconde a toolbar (GitHub, Share, etc.) */
+[data-testid="stToolbar"]{
+    display:none;
 }
 
 </style>
