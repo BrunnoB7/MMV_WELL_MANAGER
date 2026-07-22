@@ -39,6 +39,9 @@ def render_sync_indicator(
         dot_class = "sync-dot-green"
         status_class = "sync-text-green"
         title = "Banco sincronizado"
+        description = (
+            "O sistema está atualizado "
+        )
 
     elif status == "not_synced":
         dot_class = "sync-dot-red"
@@ -180,10 +183,10 @@ def render_database_backup():
             f"{modified_at.strftime('%d/%m/%Y às %H:%M')}"
         )
 
-        st.caption(
-            "Tamanho: "
-            f"{format_file_size(database_info['size_bytes'])}"
-        )
+        # st.caption(
+        #     "Tamanho: "
+        #     f"{format_file_size(database_info['size_bytes'])}"
+        # )
 
         admin_password = st.text_input(
             "Senha administrativa",
