@@ -6,18 +6,18 @@ from services.deliverable_service import DeliverableService
 
 
 STATUS_COLORS = {
-    "Concluído": "#4B5563",
-    "Em andamento": "#D71920",
-    "Não iniciado": "#9CA3AF",
-    "Atrasado": "#991B1B",
-    "Bloqueado": "#7C2D12",
+    "Concluído": "#16A34A",      # Verde
+    "Em andamento": "#EAB308",   # Amarelo
+    "Não iniciado": "#9CA3AF",   # Cinza
+    "Atrasado": "#DC2626",       # Vermelho
+    "Bloqueado": "#111827",      # Preto
 }
 
 PRIORITY_COLORS = {
-    "Crítica": "#991B1B",
-    "Alta": "#D71920",
-    "Média": "#F59E0B",
-    "Baixa": "#6B7280",
+    "Crítica": "#DC2626",    # Vermelho
+    "Alta": "#EA580C",       # Laranja escuro
+    "Média": "#EAB308",      # Amarelo
+    "Baixa": "#84CC16",      # Verde claro
 }
 
 
