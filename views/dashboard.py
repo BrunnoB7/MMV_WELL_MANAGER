@@ -285,7 +285,6 @@ def dashboard():
     )
 
     in_progress_activities = (DashboardService.get_in_progress_activities())
-    st.write("DEBUG atividades em andamento:",in_progress_activities,)
     pending = DashboardService.get_critical_pending()
     priorities = DashboardService.get_priorities()
 
