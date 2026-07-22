@@ -15,11 +15,36 @@ from views.fluxo_projeto import fluxo_projeto_page
 # -------------------------------------------------------
 
 st.set_page_config(
-    page_title="BECCS Baseline Manager",
-    page_icon="🛢️",
+    page_title="BECCS Well Baseline Manager",
+    page_icon="🌱",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded",
 )
+st.markdown("""
+<style>
+
+/* Esconde toda a barra superior */
+[data-testid="stToolbar"] {
+    display: none;
+}
+
+/* Esconde o menu hamburguer */
+#MainMenu {
+    visibility: hidden;
+}
+
+/* Esconde o rodapé */
+footer {
+    visibility: hidden;
+}
+
+/* Esconde o cabeçalho */
+header {
+    visibility: hidden;
+}
+
+</style>
+""", unsafe_allow_html=True)
 initialize_database()
 # -------------------------------------------------------
 # CARREGA CSS
