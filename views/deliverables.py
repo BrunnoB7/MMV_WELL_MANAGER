@@ -227,24 +227,19 @@ def deliverables_page():
 
     filtered = []
 
-    deliverables = [
-    dict(deliverable)
-    for deliverable in deliverables
-]
-
     deliverables = sorted(
-        deliverables,
-        key=lambda item: (
-            str(item.get("status") or "")
-            .strip()
-            .lower()
-            in {"concluído", "concluido"},
-    
-            item.get("deadline") or "9999-12-31",
-    
-            item.get("title") or "",
-        ),
-    )
+    deliverables,
+    key=lambda item: (
+        str(item["status"] or "")
+        .strip()
+        .lower()
+        in {"concluído", "concluido"},
+
+        item["deadline"] or "9999-12-31",
+
+        item["title"] or "",
+    ),
+)
 
     for deliverable in deliverables:
         searchable = (
