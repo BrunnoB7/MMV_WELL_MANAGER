@@ -23,11 +23,6 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Esconde toda a barra superior */
-[data-testid="stToolbar"] {
-    display: none;
-}
-
 /* Esconde o menu hamburguer */
 #MainMenu {
     visibility: hidden;
