@@ -142,31 +142,31 @@ def render_database_backup():
                     f"{error}"
                 )
 
-        st.divider()
+        # st.divider()
 
-        st.caption("Backup manual")
+        # st.caption("Backup manual")
 
-        try:
-            database_bytes = DB_PATH.read_bytes()
+        # try:
+        #     database_bytes = DB_PATH.read_bytes()
 
-            st.download_button(
-                "💾 Baixar arquivo .db",
-                data=database_bytes,
-                file_name=(
-                    "beccs_backup_"
-                    f"{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
-                    ".db"
-                ),
-                mime="application/octet-stream",
-                use_container_width=True,
-            )
+        #     st.download_button(
+        #         "💾 Baixar arquivo .db",
+        #         data=database_bytes,
+        #         file_name=(
+        #             "beccs_backup_"
+        #             f"{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
+        #             ".db"
+        #         ),
+        #         mime="application/octet-stream",
+        #         use_container_width=True,
+        #     )
 
-        except OSError as error:
-            st.error(
-                f"Não foi possível ler o banco: {error}"
-            )
+        # except OSError as error:
+        #     st.error(
+        #         f"Não foi possível ler o banco: {error}"
+        #     )
 
-        st.warning(
-            "Faça a sincronização depois de cadastrar ou "
-            "editar informações importantes."
-        )
+        # st.warning(
+        #     "Faça a sincronização depois de cadastrar ou "
+        #     "editar informações importantes."
+        # )
