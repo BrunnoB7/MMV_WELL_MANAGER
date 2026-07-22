@@ -33,11 +33,6 @@ footer {
     visibility: hidden;
 }
 
-/* Esconde o cabeçalho */
-header {
-    visibility: hidden;
-}
-
 </style>
 """, unsafe_allow_html=True)
 initialize_database()
