@@ -39,10 +39,6 @@ def render_sync_indicator(
         dot_class = "sync-dot-green"
         status_class = "sync-text-green"
         title = "Banco sincronizado"
-        description = (
-            "O banco local é igual ao arquivo salvo "
-            "no GitHub."
-        )
 
     elif status == "not_synced":
         dot_class = "sync-dot-red"
@@ -50,7 +46,7 @@ def render_sync_indicator(
         title = "Atualização necessária"
         description = (
             "Existem alterações locais que ainda não "
-            "foram enviadas ao GitHub."
+            "atualizadas."
         )
 
     elif status == "remote_missing":
