@@ -186,10 +186,11 @@ class DeliverableRepository:
                 priority,
                 status
             FROM deliverables
-            WHERE LOWER(TRIM(status)) = 'Em andamento'
+            WHERE LOWER(TRIM(COALESCE(status, ''))) = ?
             ORDER BY
                 CASE
-                    WHEN deadline IS NULL OR deadline = '' THEN 1
+                    WHEN deadline IS NULL OR TRIM(deadline) = ''
+                    THEN 1
                     ELSE 0
                 END,
                 deadline ASC,
@@ -197,10 +198,17 @@ class DeliverableRepository:
         """
     
         with get_connection() as connection:
-            cursor = connection.execute(query)
+            cursor = connection.execute(
+                query,
+                ("em andamento",),
+            )
+    
             rows = cursor.fetchall()
     
-        return [dict(row) for row in rows]
+        return [
+            dict(row)
+            for row in rows
+        ]
     
     @staticmethod
     def delete(deliverable_id):
