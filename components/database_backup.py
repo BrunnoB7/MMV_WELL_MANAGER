@@ -179,7 +179,7 @@ def render_database_backup():
         modified_at = database_info["modified_at"]
 
         st.caption(
-            "Última alteração local: "
+            "Última atualização do banco: "
             f"{modified_at.strftime('%d/%m/%Y às %H:%M')}"
         )
 
