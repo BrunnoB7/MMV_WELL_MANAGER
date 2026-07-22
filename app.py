@@ -20,21 +20,44 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
+    /* Esconde o menu de três pontos */
+    #MainMenu {
+        visibility: hidden;
+    }
 
-/* Esconde o menu hamburguer */
-#MainMenu {
-    visibility: hidden;
-}
+    /* Esconde Share, GitHub, Edit e outros botões da direita */
+    [data-testid="stToolbarActions"] {
+        display: none !important;
+    }
 
-/* Esconde a toolbar (GitHub, Share, etc.) */
-[data-testid="stToolbar"]{
-    display:none;
-}
+    /* Esconde o botão de deploy, caso apareça */
+    [data-testid="stAppDeployButton"] {
+        display: none !important;
+    }
 
-</style>
-""", unsafe_allow_html=True)
+    /* Esconde indicadores de status/conexão */
+    [data-testid="stStatusWidget"] {
+        display: none !important;
+    }
+
+    /* Mantém o cabeçalho transparente */
+    [data-testid="stHeader"] {
+        background: transparent;
+    }
+
+    /* Garante que a seta de reabrir a sidebar continue visível */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 initialize_database()
 # -------------------------------------------------------
 # CARREGA CSS
