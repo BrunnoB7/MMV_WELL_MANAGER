@@ -32,7 +32,7 @@ def validate_admin_password(password: str) -> bool:
 
 def render_database_backup():
     with st.sidebar.expander(
-        "⚙️ Administração",
+        "☁️ Atualizar banco de dados",
         expanded=False,
     ):
         st.markdown("#### Banco de dados")
