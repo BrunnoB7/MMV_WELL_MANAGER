@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from repositories.dashboard_repository import DashboardRepository
+from repositories.deliverable_repository import DashboardRepository
 from database.database import get_connection
 
 
