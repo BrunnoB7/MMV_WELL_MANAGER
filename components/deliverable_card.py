@@ -372,7 +372,7 @@ def deliverable_card(deliverable):
                     '<div class="completed-deliverable-header">'
                     '<div class="completed-deliverable-icon">✓</div>'
                     '<div class="completed-deliverable-text">'
-                    "Rarefa concluída"
+                    "Tarefa concluída"
                     "</div>"
                     "</div>"
                 ),
