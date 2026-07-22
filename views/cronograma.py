@@ -1,235 +1,821 @@
-from datetime import date
+import calendar
+from datetime import date, datetime
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 
 from database.database import get_connection
-from integrations.ms_project import (
-    get_project_info,
-    import_project_to_database,
-)
+from services.dashboard_service import DashboardService
 
 
-def load_schedule():
-    conn = get_connection()
+MONTH_NAMES = {
+    1: "Janeiro",
+    2: "Fevereiro",
+    3: "Março",
+    4: "Abril",
+    5: "Maio",
+    6: "Junho",
+    7: "Julho",
+    8: "Agosto",
+    9: "Setembro",
+    10: "Outubro",
+    11: "Novembro",
+    12: "Dezembro",
+}
 
-    df = pd.read_sql_query(
+WEEKDAY_NAMES = [
+    "Seg",
+    "Ter",
+    "Qua",
+    "Qui",
+    "Sex",
+    "Sáb",
+    "Dom",
+]
+
+
+def load_schedule_css():
+    st.markdown(
         """
-        SELECT *
-        FROM schedule
-        ORDER BY task_id
+        <style>
+            .schedule-header {
+                padding: 22px 26px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+                background: linear-gradient(
+                    135deg,
+                    rgba(15, 52, 96, 0.96),
+                    rgba(16, 86, 82, 0.90)
+                );
+                border: 1px solid rgba(128, 128, 128, 0.18);
+            }
+
+            .schedule-header h1 {
+                margin: 0;
+                color: white;
+                font-size: 1.9rem;
+            }
+
+            .schedule-header p {
+                margin: 6px 0 0 0;
+                color: rgba(255, 255, 255, 0.82);
+            }
+
+            .calendar-weekday {
+                text-align: center;
+                font-size: 0.78rem;
+                font-weight: 650;
+                opacity: 0.65;
+                padding: 5px 0 8px 0;
+            }
+
+            .calendar-legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 14px;
+                margin: 8px 0 15px 0;
+                font-size: 0.80rem;
+                opacity: 0.78;
+            }
+
+            .calendar-legend-item {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .activity-card {
+                padding: 14px 16px;
+                margin-bottom: 10px;
+                border: 1px solid rgba(128, 128, 128, 0.18);
+                border-left: 4px solid #1565C0;
+                border-radius: 10px;
+                background: rgba(21, 101, 192, 0.05);
+            }
+
+            .activity-card-title {
+                font-size: 0.98rem;
+                font-weight: 680;
+                margin-bottom: 6px;
+            }
+
+            .activity-card-details {
+                font-size: 0.81rem;
+                line-height: 1.55;
+                opacity: 0.76;
+            }
+
+            .final-date-card {
+                padding: 14px 16px;
+                border: 1px solid rgba(220, 38, 38, 0.22);
+                border-left: 4px solid #DC2626;
+                border-radius: 10px;
+                background: rgba(220, 38, 38, 0.06);
+                margin-bottom: 15px;
+            }
+
+            .final-date-title {
+                font-size: 0.88rem;
+                font-weight: 700;
+                color: #DC2626;
+            }
+
+            .final-date-value {
+                font-size: 1.35rem;
+                font-weight: 750;
+                margin-top: 3px;
+            }
+
+            .selected-date-title {
+                font-size: 1.08rem;
+                font-weight: 680;
+                margin-bottom: 12px;
+            }
+
+            div[data-testid="stButton"] > button {
+                min-height: 52px;
+            }
+        </style>
         """,
-        conn,
+        unsafe_allow_html=True,
     )
 
-    conn.close()
 
-    return df
+def parse_database_date(value):
+    if value is None:
+        return None
+
+    if isinstance(value, datetime):
+        return value.date()
+
+    if isinstance(value, date):
+        return value
+
+    text = str(value).strip()
+
+    if not text:
+        return None
+
+    accepted_formats = [
+        "%Y-%m-%d",
+        "%d/%m/%Y",
+        "%Y-%m-%d %H:%M:%S",
+        "%d/%m/%Y %H:%M:%S",
+    ]
+
+    for date_format in accepted_formats:
+        try:
+            return datetime.strptime(
+                text,
+                date_format,
+            ).date()
+
+        except ValueError:
+            continue
+
+    try:
+        return pd.to_datetime(
+            text,
+            errors="raise",
+        ).date()
+
+    except (ValueError, TypeError):
+        return None
 
 
-def cronograma_page():
-    st.title("📅 Cronograma")
-    st.caption("Sincronização com Microsoft Project")
+def format_date(value):
+    parsed_date = parse_database_date(value)
 
-    info = get_project_info()
+    if parsed_date is None:
+        return "-"
 
-    c1, c2, c3 = st.columns(3)
+    return parsed_date.strftime("%d/%m/%Y")
 
-    c1.metric("Atividades", info["tasks"])
-    c2.metric("Marcos", info["milestones"])
-    c3.metric(
-        "Última sincronização",
-        info["last_import"] or "Nunca",
+
+def load_deliverables_with_deadline():
+    query = """
+        SELECT
+            id,
+            title,
+            discipline,
+            status,
+            progress,
+            manager,
+            deadline,
+            priority
+        FROM deliverables
+        WHERE deadline IS NOT NULL
+          AND TRIM(deadline) <> ''
+        ORDER BY
+            deadline ASC,
+            title ASC
+    """
+
+    connection = get_connection()
+
+    try:
+        rows = connection.execute(query).fetchall()
+
+        deliverables = []
+
+        for row in rows:
+            item = dict(row)
+            item["parsed_deadline"] = parse_database_date(
+                item.get("deadline")
+            )
+
+            if item["parsed_deadline"] is not None:
+                deliverables.append(item)
+
+        return deliverables
+
+    finally:
+        connection.close()
+
+
+def group_deliverables_by_date(deliverables):
+    grouped = {}
+
+    for deliverable in deliverables:
+        deadline = deliverable["parsed_deadline"]
+
+        if deadline not in grouped:
+            grouped[deadline] = []
+
+        grouped[deadline].append(deliverable)
+
+    return grouped
+
+
+def initialize_calendar_state(
+    deliverables,
+    project_end_date,
+):
+    if "schedule_selected_date" not in st.session_state:
+        st.session_state.schedule_selected_date = None
+
+    if "schedule_display_year" not in st.session_state:
+        initial_date = date.today()
+
+        future_deadlines = sorted(
+            [
+                item["parsed_deadline"]
+                for item in deliverables
+                if item["parsed_deadline"] >= date.today()
+            ]
+        )
+
+        if future_deadlines:
+            initial_date = future_deadlines[0]
+
+        elif deliverables:
+            initial_date = deliverables[0]["parsed_deadline"]
+
+        elif project_end_date:
+            initial_date = project_end_date
+
+        st.session_state.schedule_display_year = (
+            initial_date.year
+        )
+
+        st.session_state.schedule_display_month = (
+            initial_date.month
+        )
+
+
+def go_to_previous_month():
+    current_year = st.session_state.schedule_display_year
+    current_month = st.session_state.schedule_display_month
+
+    if current_month == 1:
+        st.session_state.schedule_display_month = 12
+        st.session_state.schedule_display_year = (
+            current_year - 1
+        )
+
+    else:
+        st.session_state.schedule_display_month = (
+            current_month - 1
+        )
+
+
+def go_to_next_month():
+    current_year = st.session_state.schedule_display_year
+    current_month = st.session_state.schedule_display_month
+
+    if current_month == 12:
+        st.session_state.schedule_display_month = 1
+        st.session_state.schedule_display_year = (
+            current_year + 1
+        )
+
+    else:
+        st.session_state.schedule_display_month = (
+            current_month + 1
+        )
+
+
+def go_to_today():
+    today = date.today()
+
+    st.session_state.schedule_display_year = today.year
+    st.session_state.schedule_display_month = today.month
+    st.session_state.schedule_selected_date = today
+
+
+def select_calendar_date(selected_date):
+    st.session_state.schedule_selected_date = selected_date
+
+
+def build_day_label(
+    current_date,
+    activity_count,
+    project_end_date,
+):
+    labels = [str(current_date.day)]
+
+    if activity_count:
+        labels.append(f"● {activity_count}")
+
+    if project_end_date == current_date:
+        labels.append("🏁")
+
+    if current_date == date.today():
+        labels.append("Hoje")
+
+    return "\n".join(labels)
+
+
+def render_calendar(
+    deliverables_by_date,
+    project_end_date,
+):
+    display_year = st.session_state.schedule_display_year
+    display_month = st.session_state.schedule_display_month
+
+    previous_column, title_column, next_column = st.columns(
+        [1, 4, 1]
     )
 
-    st.divider()
-
-    uploaded_file = st.file_uploader(
-        "Importar Excel exportado do Microsoft Project",
-        type=["xlsx"],
-        help="Selecione o arquivo Excel exportado pelo Microsoft Project.",
-    )
-
-    col_import, col_fixed = st.columns(2)
-
-    with col_import:
-        if st.button(
-            "Importar arquivo selecionado",
+    with previous_column:
+        st.button(
+            "←",
+            key="schedule_previous_month",
             use_container_width=True,
-            disabled=uploaded_file is None,
-        ):
-            try:
-                result = import_project_to_database(uploaded_file)
+            on_click=go_to_previous_month,
+        )
 
-                st.success(
-                    f"Importação concluída: "
-                    f"{result['tasks']} atividades, "
-                    f"{result['deliverables']} deliverables e "
-                    f"{result['milestones']} marcos."
+    with title_column:
+        st.markdown(
+            (
+                "<h3 style='text-align:center; margin-top:8px;'>"
+                f"{MONTH_NAMES[display_month]} de {display_year}"
+                "</h3>"
+            ),
+            unsafe_allow_html=True,
+        )
+
+    with next_column:
+        st.button(
+            "→",
+            key="schedule_next_month",
+            use_container_width=True,
+            on_click=go_to_next_month,
+        )
+
+    today_column, final_column = st.columns([1, 2])
+
+    with today_column:
+        st.button(
+            "Ir para hoje",
+            key="schedule_go_to_today",
+            use_container_width=True,
+            on_click=go_to_today,
+        )
+
+    with final_column:
+        if project_end_date:
+            if st.button(
+                (
+                    "🏁 Ir para a data final — "
+                    f"{project_end_date.strftime('%d/%m/%Y')}"
+                ),
+                key="schedule_go_to_final_date",
+                use_container_width=True,
+            ):
+                st.session_state.schedule_display_year = (
+                    project_end_date.year
+                )
+
+                st.session_state.schedule_display_month = (
+                    project_end_date.month
+                )
+
+                st.session_state.schedule_selected_date = (
+                    project_end_date
                 )
 
                 st.rerun()
 
-            except Exception as error:
-                st.error(str(error))
+    st.markdown(
+        (
+            '<div class="calendar-legend">'
+            '<div class="calendar-legend-item">'
+            "● Dia com atividade"
+            "</div>"
+            '<div class="calendar-legend-item">'
+            "🏁 Data final do projeto"
+            "</div>"
+            '<div class="calendar-legend-item">'
+            "Hoje = data atual"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
-    with col_fixed:
-        if st.button(
-            "Importar arquivo da pasta data/project",
-            use_container_width=True,
-        ):
-            try:
-                result = import_project_to_database()
+    weekday_columns = st.columns(7)
 
-                st.success(
-                    f"Importação concluída: "
-                    f"{result['tasks']} atividades."
+    for index, weekday_name in enumerate(WEEKDAY_NAMES):
+        with weekday_columns[index]:
+            st.markdown(
+                (
+                    '<div class="calendar-weekday">'
+                    f"{weekday_name}"
+                    "</div>"
+                ),
+                unsafe_allow_html=True,
+            )
+
+    month_calendar = calendar.Calendar(
+        firstweekday=calendar.MONDAY
+    )
+
+    month_weeks = month_calendar.monthdayscalendar(
+        display_year,
+        display_month,
+    )
+
+    selected_date = st.session_state.schedule_selected_date
+
+    for week_index, week in enumerate(month_weeks):
+        week_columns = st.columns(7)
+
+        for weekday_index, day_number in enumerate(week):
+            with week_columns[weekday_index]:
+                if day_number == 0:
+                    st.markdown(
+                        "<div style='height:52px;'></div>",
+                        unsafe_allow_html=True,
+                    )
+                    continue
+
+                current_date = date(
+                    display_year,
+                    display_month,
+                    day_number,
                 )
 
-                st.rerun()
+                activities = deliverables_by_date.get(
+                    current_date,
+                    [],
+                )
 
-            except Exception as error:
-                st.error(str(error))
+                activity_count = len(activities)
+
+                label = build_day_label(
+                    current_date=current_date,
+                    activity_count=activity_count,
+                    project_end_date=project_end_date,
+                )
+
+                button_type = (
+                    "primary"
+                    if selected_date == current_date
+                    else "secondary"
+                )
+
+                if st.button(
+                    label,
+                    key=(
+                        "schedule_day_"
+                        f"{display_year}_"
+                        f"{display_month}_"
+                        f"{day_number}_"
+                        f"{week_index}_"
+                        f"{weekday_index}"
+                    ),
+                    type=button_type,
+                    use_container_width=True,
+                ):
+                    select_calendar_date(current_date)
+                    st.rerun()
+
+
+def render_activity_card(activity):
+    title = activity.get("title") or "Sem título"
+    discipline = (
+        activity.get("discipline")
+        or "Não definida"
+    )
+
+    manager = (
+        activity.get("manager")
+        or "Não definido"
+    )
+
+    status = (
+        activity.get("status")
+        or "Não definido"
+    )
+
+    priority = (
+        activity.get("priority")
+        or "Não definida"
+    )
+
+    progress = activity.get("progress") or 0
+
+    try:
+        progress = int(float(progress))
+    except (TypeError, ValueError):
+        progress = 0
+
+    progress = max(0, min(100, progress))
+
+    st.markdown(
+        (
+            '<div class="activity-card">'
+            f'<div class="activity-card-title">{title}</div>'
+            '<div class="activity-card-details">'
+            f"<strong>Disciplina:</strong> {discipline}<br>"
+            f"<strong>Responsável:</strong> {manager}<br>"
+            f"<strong>Status:</strong> {status}<br>"
+            f"<strong>Prioridade:</strong> {priority}"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+    st.progress(progress / 100)
+
+    st.caption(f"{progress}% concluído")
+
+
+def render_selected_date_activities(
+    deliverables_by_date,
+    project_end_date,
+):
+    selected_date = st.session_state.schedule_selected_date
 
     st.divider()
 
-    schedule = load_schedule()
-
-    if schedule.empty:
-        st.info("Nenhum cronograma importado.")
+    if selected_date is None:
+        st.info(
+            "Selecione um dia no calendário para visualizar "
+            "as atividades previstas."
+        )
         return
 
-    schedule["start_date"] = pd.to_datetime(
-        schedule["start_date"],
-        errors="coerce",
+    activities = deliverables_by_date.get(
+        selected_date,
+        [],
     )
 
-    schedule["finish_date"] = pd.to_datetime(
-        schedule["finish_date"],
-        errors="coerce",
+    st.markdown(
+        (
+            '<div class="selected-date-title">'
+            f"Atividades de {selected_date.strftime('%d/%m/%Y')}"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
     )
 
-    valid_schedule = schedule.dropna(
-        subset=["start_date", "finish_date"]
-    ).copy()
+    if selected_date == project_end_date:
+        st.markdown(
+            (
+                '<div class="final-date-card">'
+                '<div class="final-date-title">'
+                "🏁 DATA FINAL DO PROJETO"
+                "</div>"
+                '<div class="final-date-value">'
+                f"{selected_date.strftime('%d/%m/%Y')}"
+                "</div>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
 
-    disciplines = sorted(
-        schedule["discipline"].dropna().unique().tolist()
+    if not activities:
+        st.info(
+            "Não existem atividades cadastradas para entrega "
+            "nesta data."
+        )
+        return
+
+    st.caption(
+        f"{len(activities)} atividade(s) prevista(s) "
+        "para esta data."
     )
 
-    selected_disciplines = st.multiselect(
-        "Filtrar disciplinas",
-        disciplines,
-        default=disciplines,
-    )
+    for activity in activities:
+        render_activity_card(activity)
 
-    if selected_disciplines:
-        valid_schedule = valid_schedule[
-            valid_schedule["discipline"].isin(selected_disciplines)
-        ]
 
-    show_summary = st.checkbox(
-        "Exibir tarefas-resumo",
-        value=True,
-    )
+def render_upcoming_deliveries(deliverables):
+    today = date.today()
 
-    if not show_summary:
-        valid_schedule = valid_schedule[
-            valid_schedule["summary"] == 0
-        ]
+    upcoming = [
+        item
+        for item in deliverables
+        if item["parsed_deadline"] >= today
+    ]
 
-    st.subheader("Gráfico de Gantt")
+    upcoming = sorted(
+        upcoming,
+        key=lambda item: (
+            item["parsed_deadline"],
+            item.get("title") or "",
+        ),
+    )[:10]
 
-    if valid_schedule.empty:
-        st.warning("Nenhuma atividade encontrada para os filtros.")
-    else:
-        gantt = px.timeline(
-            valid_schedule,
-            x_start="start_date",
-            x_end="finish_date",
-            y="task_name",
-            color="discipline",
-            hover_data={
-                "progress": True,
-                "responsible": True,
-                "start_date": True,
-                "finish_date": True,
-                "task_name": False,
+    with st.expander(
+        "📋 Visualizar próximas entregas",
+        expanded=False,
+    ):
+        if not upcoming:
+            st.info("Não existem próximas entregas cadastradas.")
+            return
+
+        table = pd.DataFrame(
+            [
+                {
+                    "Atividade": item.get("title") or "Sem título",
+                    "Disciplina": (
+                        item.get("discipline")
+                        or "Não definida"
+                    ),
+                    "Prazo": format_date(
+                        item.get("deadline")
+                    ),
+                    "Status": (
+                        item.get("status")
+                        or "Não definido"
+                    ),
+                    "Progresso": (
+                        item.get("progress")
+                        or 0
+                    ),
+                    "Responsável": (
+                        item.get("manager")
+                        or "Não definido"
+                    ),
+                }
+                for item in upcoming
+            ]
+        )
+
+        table["Progresso"] = (
+            pd.to_numeric(
+                table["Progresso"],
+                errors="coerce",
+            )
+            .fillna(0)
+            .clip(0, 100)
+            .astype(int)
+        )
+
+        st.dataframe(
+            table,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Atividade": st.column_config.TextColumn(
+                    "Atividade",
+                    width="large",
+                ),
+                "Progresso": st.column_config.ProgressColumn(
+                    "Progresso",
+                    min_value=0,
+                    max_value=100,
+                    format="%d%%",
+                ),
             },
         )
 
-        gantt.update_yaxes(
-            autorange="reversed",
-            title=None,
-        )
 
-        gantt.update_xaxes(title=None)
+def cronograma_page():
+    load_schedule_css()
 
-        gantt.update_layout(
-            height=max(500, len(valid_schedule) * 28),
-            legend_title_text="Disciplina",
-            margin=dict(l=10, r=10, t=30, b=10),
-        )
+    settings = DashboardService.get_project_settings()
 
-        gantt.add_vline(
-            x=pd.Timestamp(date.today()).timestamp() * 1000,
-            line_dash="dash",
-            annotation_text="Hoje",
-        )
-
-        st.plotly_chart(
-            gantt,
-            use_container_width=True,
-        )
-
-    st.subheader("Marcos")
-
-    milestones = schedule[schedule["milestone"] == 1][
-        [
-            "task_name",
-            "finish_date",
-            "progress",
-            "responsible",
-            "discipline",
-        ]
-    ]
-
-    if milestones.empty:
-        st.info("Nenhum marco encontrado.")
-    else:
-        st.dataframe(
-            milestones,
-            use_container_width=True,
-            hide_index=True,
-        )
-
-    st.subheader("Atividades do cronograma")
-
-    table = schedule[
-        [
-            "task_id",
-            "task_name",
-            "discipline",
-            "start_date",
-            "finish_date",
-            "progress",
-            "responsible",
-        ]
-    ].copy()
-
-    table.columns = [
-        "ID",
-        "Atividade",
-        "Disciplina",
-        "Início",
-        "Fim",
-        "Progresso (%)",
-        "Responsável",
-    ]
-
-    st.dataframe(
-        table,
-        use_container_width=True,
-        hide_index=True,
+    project_end_date = parse_database_date(
+        settings.get("end_date")
     )
+
+    deliverables = load_deliverables_with_deadline()
+
+    deliverables_by_date = group_deliverables_by_date(
+        deliverables
+    )
+
+    initialize_calendar_state(
+        deliverables=deliverables,
+        project_end_date=project_end_date,
+    )
+
+    st.markdown(
+        (
+            '<div class="schedule-header">'
+            "<h1>📅 Cronograma de entregas</h1>"
+            "<p>"
+            "Acompanhamento das datas previstas para conclusão "
+            "das atividades do projeto."
+            "</p>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+    metric_1, metric_2, metric_3 = st.columns(3)
+
+    total_deliverables = len(deliverables)
+
+    future_deliverables = len(
+        [
+            item
+            for item in deliverables
+            if item["parsed_deadline"] >= date.today()
+        ]
+    )
+
+    overdue_deliverables = len(
+        [
+            item
+            for item in deliverables
+            if (
+                item["parsed_deadline"] < date.today()
+                and str(
+                    item.get("status") or ""
+                ).strip().lower()
+                not in {
+                    "concluído",
+                    "concluido",
+                    "finalizado",
+                    "completed",
+                }
+            )
+        ]
+    )
+
+    metric_1.metric(
+        "Entregas cadastradas",
+        total_deliverables,
+    )
+
+    metric_2.metric(
+        "Próximas entregas",
+        future_deliverables,
+    )
+
+    metric_3.metric(
+        "Entregas vencidas",
+        overdue_deliverables,
+    )
+
+    if project_end_date:
+        st.markdown(
+            (
+                '<div class="final-date-card">'
+                '<div class="final-date-title">'
+                "🏁 DATA PREVISTA PARA FINALIZAÇÃO DO PROJETO"
+                "</div>"
+                '<div class="final-date-value">'
+                f"{project_end_date.strftime('%d/%m/%Y')}"
+                "</div>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+
+    else:
+        st.warning(
+            "A data final do projeto ainda não foi configurada "
+            "no Dashboard."
+        )
+
+    with st.container(border=True):
+        render_calendar(
+            deliverables_by_date=deliverables_by_date,
+            project_end_date=project_end_date,
+        )
+
+    render_selected_date_activities(
+        deliverables_by_date=deliverables_by_date,
+        project_end_date=project_end_date,
+    )
+
+    st.write("")
+
+    render_upcoming_deliveries(deliverables)
