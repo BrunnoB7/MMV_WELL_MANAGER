@@ -466,86 +466,86 @@ class GitHubBackupService:
                 f"Detalhes: {error}"
             ) from error
         
-        @staticmethod
-        def upload_database(
-            commit_message: str | None = None,
-        ) -> dict[str, Any]:
-            settings = GitHubBackupService._get_settings()
-            temporary_path = (
-                GitHubBackupService
-                ._create_consistent_database_copy()
+    @staticmethod
+    def upload_database(
+        commit_message: str | None = None,
+    ) -> dict[str, Any]:
+        settings = GitHubBackupService._get_settings()
+        temporary_path = (
+            GitHubBackupService
+            ._create_consistent_database_copy()
+        )
+
+        try:
+            database_bytes = temporary_path.read_bytes()
+            encoded_content = base64.b64encode(
+                database_bytes
+            ).decode("utf-8")
+
+            remote_file = (
+                GitHubBackupService._get_remote_file()
             )
-    
-            try:
-                database_bytes = temporary_path.read_bytes()
-                encoded_content = base64.b64encode(
-                    database_bytes
-                ).decode("utf-8")
-    
-                remote_file = (
-                    GitHubBackupService._get_remote_file()
-                )
-    
-                now = datetime.now()
-    
-                payload: dict[str, Any] = {
-                    "message": (
-                        commit_message.strip()
-                        if commit_message
-                        else (
-                            "Backup automático do banco BECCS - "
-                            f"{now.strftime('%d/%m/%Y %H:%M:%S')}"
-                        )
-                    ),
-                    "content": encoded_content,
-                    "branch": settings["branch"],
-                }
-    
-                if remote_file:
-                    payload["sha"] = remote_file["sha"]
-    
-                url = GitHubBackupService._get_contents_url(
-                    owner=settings["owner"],
-                    repo=settings["repo"],
-                    database_path=settings["database_path"],
-                )
-    
-                response = requests.put(
-                    url,
-                    headers=GitHubBackupService._get_headers(
-                        settings["token"]
-                    ),
-                    json=payload,
-                    timeout=120,
-                )
-    
-                if response.status_code not in (200, 201):
-                    GitHubBackupService._raise_api_error(
-                        response=response,
-                        operation="salvar o banco no GitHub",
+
+            now = datetime.now()
+
+            payload: dict[str, Any] = {
+                "message": (
+                    commit_message.strip()
+                    if commit_message
+                    else (
+                        "Backup automático do banco BECCS - "
+                        f"{now.strftime('%d/%m/%Y %H:%M:%S')}"
                     )
-    
-                result = response.json()
-                commit = result.get("commit", {})
-                content = result.get("content", {})
-    
-                return {
-                    "success": True,
-                    "commit_sha": commit.get("sha"),
-                    "commit_url": commit.get("html_url"),
-                    "file_url": content.get("html_url"),
-                    "database_size_bytes": len(
-                        database_bytes
-                    ),
-                    "backup_at": now,
-                    "created_file": remote_file is None,
-                }
-    
-            except requests.RequestException as error:
-                raise GitHubBackupError(
-                    "Não foi possível conectar à API do GitHub. "
-                    f"Detalhes: {error}"
-                ) from error
-    
-            finally:
-                temporary_path.unlink(missing_ok=True)
+                ),
+                "content": encoded_content,
+                "branch": settings["branch"],
+            }
+
+            if remote_file:
+                payload["sha"] = remote_file["sha"]
+
+            url = GitHubBackupService._get_contents_url(
+                owner=settings["owner"],
+                repo=settings["repo"],
+                database_path=settings["database_path"],
+            )
+
+            response = requests.put(
+                url,
+                headers=GitHubBackupService._get_headers(
+                    settings["token"]
+                ),
+                json=payload,
+                timeout=120,
+            )
+
+            if response.status_code not in (200, 201):
+                GitHubBackupService._raise_api_error(
+                    response=response,
+                    operation="salvar o banco no GitHub",
+                )
+
+            result = response.json()
+            commit = result.get("commit", {})
+            content = result.get("content", {})
+
+            return {
+                "success": True,
+                "commit_sha": commit.get("sha"),
+                "commit_url": commit.get("html_url"),
+                "file_url": content.get("html_url"),
+                "database_size_bytes": len(
+                    database_bytes
+                ),
+                "backup_at": now,
+                "created_file": remote_file is None,
+            }
+
+        except requests.RequestException as error:
+            raise GitHubBackupError(
+                "Não foi possível conectar à API do GitHub. "
+                f"Detalhes: {error}"
+            ) from error
+
+        finally:
+            temporary_path.unlink(missing_ok=True)
