@@ -256,296 +256,296 @@ class GitHubBackupService:
         }
 
 
-@staticmethod
-def _calculate_hash(content: bytes) -> str:
-    return hashlib.sha256(content).hexdigest()
-
-@staticmethod
-def _calculate_hash(content: bytes) -> str:
-    return hashlib.sha256(content).hexdigest()
-
-
-@staticmethod
-def get_remote_database_info() -> dict[str, Any]:
-    """
-    Consulta o banco salvo no GitHub e retorna
-    informações para comparação com o banco local.
-    """
-    settings = GitHubBackupService._get_settings()
-
-    url = GitHubBackupService._get_contents_url(
-        owner=settings["owner"],
-        repo=settings["repo"],
-        database_path=settings["database_path"],
-    )
-
-    try:
-        response = requests.get(
-            url,
-            headers=GitHubBackupService._get_headers(
-                settings["token"]
-            ),
-            params={
-                "ref": settings["branch"],
-            },
-            timeout=30,
-        )
-
-        if response.status_code == 404:
-            return {
-                "exists": False,
-                "hash": None,
-                "size_bytes": 0,
-                "sha": None,
-            }
-
-        if response.status_code != 200:
-            GitHubBackupService._raise_api_error(
-                response=response,
-                operation="consultar o banco no GitHub",
-            )
-
-        response_data = response.json()
-
-        encoded_content = response_data.get("content")
-
-        if not encoded_content:
-            raise GitHubBackupError(
-                "O GitHub não retornou o conteúdo do banco."
-            )
-
-        normalized_content = encoded_content.replace(
-            "\n",
-            "",
-        )
-
-        database_bytes = base64.b64decode(
-            normalized_content
-        )
-
-        return {
-            "exists": True,
-            "hash": GitHubBackupService._calculate_hash(
-                database_bytes
-            ),
-            "size_bytes": len(database_bytes),
-            "sha": response_data.get("sha"),
-            "html_url": response_data.get("html_url"),
-        }
-
-    except requests.RequestException as error:
-        raise GitHubBackupError(
-            "Não foi possível consultar o banco no GitHub. "
-            f"Detalhes: {error}"
-        ) from error
-
-
-@staticmethod
-def get_synchronization_status() -> dict[str, Any]:
-    """
-    Compara o banco local com o banco salvo no GitHub.
-    """
-    local_info = (
-        GitHubBackupService.get_local_database_info()
-    )
-
-    if not local_info["exists"]:
-        return {
-            "status": "local_missing",
-            "is_synced": False,
-            "message": "Banco local não encontrado",
-            "local": local_info,
-            "remote": None,
-        }
-
-    remote_info = (
-        GitHubBackupService.get_remote_database_info()
-    )
-
-    if not remote_info["exists"]:
-        return {
-            "status": "remote_missing",
-            "is_synced": False,
-            "message": "Banco ainda não salvo no GitHub",
-            "local": local_info,
-            "remote": remote_info,
-        }
-
-    is_synced = (
-        local_info["hash"]
-        == remote_info["hash"]
-    )
-
-    return {
-        "status": (
-            "synced"
-            if is_synced
-            else "not_synced"
-        ),
-        "is_synced": is_synced,
-        "message": (
-            "Banco sincronizado"
-            if is_synced
-            else "Alterações não sincronizadas"
-        ),
-        "local": local_info,
-        "remote": remote_info,
-    }
-    
-@staticmethod
-def get_remote_database_info() -> dict[str, Any]:
-    """
-    Consulta o banco salvo no GitHub e retorna
-    informações para comparação com o banco local.
-    """
-    settings = GitHubBackupService._get_settings()
-
-    url = GitHubBackupService._get_contents_url(
-        owner=settings["owner"],
-        repo=settings["repo"],
-        database_path=settings["database_path"],
-    )
-
-    try:
-        response = requests.get(
-            url,
-            headers=GitHubBackupService._get_headers(
-                settings["token"]
-            ),
-            params={
-                "ref": settings["branch"],
-            },
-            timeout=30,
-        )
-
-        if response.status_code == 404:
-            return {
-                "exists": False,
-                "hash": None,
-                "size_bytes": 0,
-                "sha": None,
-            }
-
-        if response.status_code != 200:
-            GitHubBackupService._raise_api_error(
-                response=response,
-                operation="consultar o banco no GitHub",
-            )
-
-        response_data = response.json()
-
-        encoded_content = response_data.get("content")
-
-        if not encoded_content:
-            raise GitHubBackupError(
-                "O GitHub não retornou o conteúdo do banco."
-            )
-
-        normalized_content = encoded_content.replace(
-            "\n",
-            "",
-        )
-
-        database_bytes = base64.b64decode(
-            normalized_content
-        )
-
-        return {
-            "exists": True,
-            "hash": GitHubBackupService._calculate_hash(
-                database_bytes
-            ),
-            "size_bytes": len(database_bytes),
-            "sha": response_data.get("sha"),
-            "html_url": response_data.get("html_url"),
-        }
-
-    except requests.RequestException as error:
-        raise GitHubBackupError(
-            "Não foi possível consultar o banco no GitHub. "
-            f"Detalhes: {error}"
-        ) from error
-    
     @staticmethod
-    def upload_database(
-        commit_message: str | None = None,
-    ) -> dict[str, Any]:
+    def _calculate_hash(content: bytes) -> str:
+        return hashlib.sha256(content).hexdigest()
+
+    @staticmethod
+    def _calculate_hash(content: bytes) -> str:
+        return hashlib.sha256(content).hexdigest()
+
+
+    @staticmethod
+    def get_remote_database_info() -> dict[str, Any]:
+        """
+        Consulta o banco salvo no GitHub e retorna
+        informações para comparação com o banco local.
+        """
         settings = GitHubBackupService._get_settings()
-        temporary_path = (
-            GitHubBackupService
-            ._create_consistent_database_copy()
+    
+        url = GitHubBackupService._get_contents_url(
+            owner=settings["owner"],
+            repo=settings["repo"],
+            database_path=settings["database_path"],
         )
-
+    
         try:
-            database_bytes = temporary_path.read_bytes()
-            encoded_content = base64.b64encode(
-                database_bytes
-            ).decode("utf-8")
-
-            remote_file = (
-                GitHubBackupService._get_remote_file()
-            )
-
-            now = datetime.now()
-
-            payload: dict[str, Any] = {
-                "message": (
-                    commit_message.strip()
-                    if commit_message
-                    else (
-                        "Backup automático do banco BECCS - "
-                        f"{now.strftime('%d/%m/%Y %H:%M:%S')}"
-                    )
-                ),
-                "content": encoded_content,
-                "branch": settings["branch"],
-            }
-
-            if remote_file:
-                payload["sha"] = remote_file["sha"]
-
-            url = GitHubBackupService._get_contents_url(
-                owner=settings["owner"],
-                repo=settings["repo"],
-                database_path=settings["database_path"],
-            )
-
-            response = requests.put(
+            response = requests.get(
                 url,
                 headers=GitHubBackupService._get_headers(
                     settings["token"]
                 ),
-                json=payload,
-                timeout=120,
+                params={
+                    "ref": settings["branch"],
+                },
+                timeout=30,
             )
-
-            if response.status_code not in (200, 201):
+    
+            if response.status_code == 404:
+                return {
+                    "exists": False,
+                    "hash": None,
+                    "size_bytes": 0,
+                    "sha": None,
+                }
+    
+            if response.status_code != 200:
                 GitHubBackupService._raise_api_error(
                     response=response,
-                    operation="salvar o banco no GitHub",
+                    operation="consultar o banco no GitHub",
                 )
-
-            result = response.json()
-            commit = result.get("commit", {})
-            content = result.get("content", {})
-
+    
+            response_data = response.json()
+    
+            encoded_content = response_data.get("content")
+    
+            if not encoded_content:
+                raise GitHubBackupError(
+                    "O GitHub não retornou o conteúdo do banco."
+                )
+    
+            normalized_content = encoded_content.replace(
+                "\n",
+                "",
+            )
+    
+            database_bytes = base64.b64decode(
+                normalized_content
+            )
+    
             return {
-                "success": True,
-                "commit_sha": commit.get("sha"),
-                "commit_url": commit.get("html_url"),
-                "file_url": content.get("html_url"),
-                "database_size_bytes": len(
+                "exists": True,
+                "hash": GitHubBackupService._calculate_hash(
                     database_bytes
                 ),
-                "backup_at": now,
-                "created_file": remote_file is None,
+                "size_bytes": len(database_bytes),
+                "sha": response_data.get("sha"),
+                "html_url": response_data.get("html_url"),
             }
-
+    
         except requests.RequestException as error:
             raise GitHubBackupError(
-                "Não foi possível conectar à API do GitHub. "
+                "Não foi possível consultar o banco no GitHub. "
                 f"Detalhes: {error}"
             ) from error
 
-        finally:
-            temporary_path.unlink(missing_ok=True)
+
+    @staticmethod
+    def get_synchronization_status() -> dict[str, Any]:
+        """
+        Compara o banco local com o banco salvo no GitHub.
+        """
+        local_info = (
+            GitHubBackupService.get_local_database_info()
+        )
+    
+        if not local_info["exists"]:
+            return {
+                "status": "local_missing",
+                "is_synced": False,
+                "message": "Banco local não encontrado",
+                "local": local_info,
+                "remote": None,
+            }
+    
+        remote_info = (
+            GitHubBackupService.get_remote_database_info()
+        )
+    
+        if not remote_info["exists"]:
+            return {
+                "status": "remote_missing",
+                "is_synced": False,
+                "message": "Banco ainda não salvo no GitHub",
+                "local": local_info,
+                "remote": remote_info,
+            }
+    
+        is_synced = (
+            local_info["hash"]
+            == remote_info["hash"]
+        )
+    
+        return {
+            "status": (
+                "synced"
+                if is_synced
+                else "not_synced"
+            ),
+            "is_synced": is_synced,
+            "message": (
+                "Banco sincronizado"
+                if is_synced
+                else "Alterações não sincronizadas"
+            ),
+            "local": local_info,
+            "remote": remote_info,
+        }
+        
+    @staticmethod
+    def get_remote_database_info() -> dict[str, Any]:
+        """
+        Consulta o banco salvo no GitHub e retorna
+        informações para comparação com o banco local.
+        """
+        settings = GitHubBackupService._get_settings()
+    
+        url = GitHubBackupService._get_contents_url(
+            owner=settings["owner"],
+            repo=settings["repo"],
+            database_path=settings["database_path"],
+        )
+    
+        try:
+            response = requests.get(
+                url,
+                headers=GitHubBackupService._get_headers(
+                    settings["token"]
+                ),
+                params={
+                    "ref": settings["branch"],
+                },
+                timeout=30,
+            )
+    
+            if response.status_code == 404:
+                return {
+                    "exists": False,
+                    "hash": None,
+                    "size_bytes": 0,
+                    "sha": None,
+                }
+    
+            if response.status_code != 200:
+                GitHubBackupService._raise_api_error(
+                    response=response,
+                    operation="consultar o banco no GitHub",
+                )
+    
+            response_data = response.json()
+    
+            encoded_content = response_data.get("content")
+    
+            if not encoded_content:
+                raise GitHubBackupError(
+                    "O GitHub não retornou o conteúdo do banco."
+                )
+    
+            normalized_content = encoded_content.replace(
+                "\n",
+                "",
+            )
+    
+            database_bytes = base64.b64decode(
+                normalized_content
+            )
+    
+            return {
+                "exists": True,
+                "hash": GitHubBackupService._calculate_hash(
+                    database_bytes
+                ),
+                "size_bytes": len(database_bytes),
+                "sha": response_data.get("sha"),
+                "html_url": response_data.get("html_url"),
+            }
+    
+        except requests.RequestException as error:
+            raise GitHubBackupError(
+                "Não foi possível consultar o banco no GitHub. "
+                f"Detalhes: {error}"
+            ) from error
+        
+        @staticmethod
+        def upload_database(
+            commit_message: str | None = None,
+        ) -> dict[str, Any]:
+            settings = GitHubBackupService._get_settings()
+            temporary_path = (
+                GitHubBackupService
+                ._create_consistent_database_copy()
+            )
+    
+            try:
+                database_bytes = temporary_path.read_bytes()
+                encoded_content = base64.b64encode(
+                    database_bytes
+                ).decode("utf-8")
+    
+                remote_file = (
+                    GitHubBackupService._get_remote_file()
+                )
+    
+                now = datetime.now()
+    
+                payload: dict[str, Any] = {
+                    "message": (
+                        commit_message.strip()
+                        if commit_message
+                        else (
+                            "Backup automático do banco BECCS - "
+                            f"{now.strftime('%d/%m/%Y %H:%M:%S')}"
+                        )
+                    ),
+                    "content": encoded_content,
+                    "branch": settings["branch"],
+                }
+    
+                if remote_file:
+                    payload["sha"] = remote_file["sha"]
+    
+                url = GitHubBackupService._get_contents_url(
+                    owner=settings["owner"],
+                    repo=settings["repo"],
+                    database_path=settings["database_path"],
+                )
+    
+                response = requests.put(
+                    url,
+                    headers=GitHubBackupService._get_headers(
+                        settings["token"]
+                    ),
+                    json=payload,
+                    timeout=120,
+                )
+    
+                if response.status_code not in (200, 201):
+                    GitHubBackupService._raise_api_error(
+                        response=response,
+                        operation="salvar o banco no GitHub",
+                    )
+    
+                result = response.json()
+                commit = result.get("commit", {})
+                content = result.get("content", {})
+    
+                return {
+                    "success": True,
+                    "commit_sha": commit.get("sha"),
+                    "commit_url": commit.get("html_url"),
+                    "file_url": content.get("html_url"),
+                    "database_size_bytes": len(
+                        database_bytes
+                    ),
+                    "backup_at": now,
+                    "created_file": remote_file is None,
+                }
+    
+            except requests.RequestException as error:
+                raise GitHubBackupError(
+                    "Não foi possível conectar à API do GitHub. "
+                    f"Detalhes: {error}"
+                ) from error
+    
+            finally:
+                temporary_path.unlink(missing_ok=True)
