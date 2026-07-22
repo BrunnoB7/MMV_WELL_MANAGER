@@ -1,5 +1,5 @@
 from datetime import date, datetime
-
+from repositories.dashboard_repository import DashboardRepository
 from database.database import get_connection
 
 
@@ -128,7 +128,42 @@ class DashboardService:
             "average_progress": int(average_progress or 0),
         }
 
-
+    @staticmethod
+    def get_in_progress_activities():
+        activities = (
+            DashboardRepository.get_in_progress_activities()
+        )
+    
+        normalized_activities = []
+    
+        for activity in activities:
+            normalized_activities.append(
+                {
+                    "id": activity.get("id"),
+                    "title": activity.get("title") or "Sem título",
+                    "discipline": (
+                        activity.get("discipline")
+                        or "Não definida"
+                    ),
+                    "progress": activity.get("progress") or 0,
+                    "manager": (
+                        activity.get("manager")
+                        or "Não definido"
+                    ),
+                    "deadline": activity.get("deadline"),
+                    "priority": (
+                        activity.get("priority")
+                        or "Não definida"
+                    ),
+                    "status": (
+                        activity.get("status")
+                        or "Em andamento"
+                    ),
+                }
+            )
+    
+        return normalized_activities
+    
     @staticmethod
     def get_days_remaining(end_date):
         if not end_date:
