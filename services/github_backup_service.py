@@ -256,7 +256,7 @@ class GitHubBackupService:
         }
 
 
-    @staticmethod
+@staticmethod
 def _calculate_hash(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
