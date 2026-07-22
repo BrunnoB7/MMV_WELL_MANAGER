@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from repositories.deliverable_repository import DashboardRepository
+from repositories.deliverable_repository import DeliverableRepository
 from database.database import get_connection
 
 
@@ -131,7 +131,7 @@ class DashboardService:
     @staticmethod
     def get_in_progress_activities():
         activities = (
-            DashboardRepository.get_in_progress_activities()
+            DeliverableRepository.get_in_progress_activities()
         )
     
         normalized_activities = []
