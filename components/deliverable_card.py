@@ -275,7 +275,110 @@ def deliverable_card(deliverable):
         "google_drive",
     )
 
+    is_completed = (
+        str(status)
+        .strip()
+        .lower()
+        in {"concluído", "concluido"}
+    )
+
+    if is_completed:
+        st.markdown(
+            """
+            <style>
+            div[data-testid="stVerticalBlockBorderWrapper"]:has(
+                .completed-deliverable-marker
+            ) {
+                border: 1px solid rgba(22, 163, 74, 0.35);
+                border-left: 5px solid #16A34A;
+                background: linear-gradient(
+                    135deg,
+                    rgba(22, 163, 74, 0.10),
+                    rgba(22, 163, 74, 0.03)
+                );
+                box-shadow: 0 5px 15px rgba(22, 163, 74, 0.08);
+            }
+
+            .completed-deliverable-marker {
+                display: none;
+            }
+
+            .completed-deliverable-header {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+                padding: 10px 12px;
+                margin-bottom: 12px;
+                border-radius: 9px;
+                background: rgba(22, 163, 74, 0.13);
+                border: 1px solid rgba(22, 163, 74, 0.22);
+            }
+
+            .completed-deliverable-icon {
+                width: 27px;
+                height: 27px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: #16A34A;
+                color: white;
+                font-weight: 800;
+                flex-shrink: 0;
+            }
+
+            .completed-deliverable-text {
+                color: #15803D;
+                font-size: 0.88rem;
+                font-weight: 750;
+            }
+
+            .completed-final-message {
+                padding: 13px 14px;
+                margin-top: 12px;
+                margin-bottom: 8px;
+                border-radius: 9px;
+                background: rgba(22, 163, 74, 0.10);
+                border: 1px solid rgba(22, 163, 74, 0.20);
+            }
+
+            .completed-final-message-title {
+                color: #15803D;
+                font-size: 0.76rem;
+                font-weight: 750;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+                margin-bottom: 5px;
+            }
+
+            .completed-final-message-text {
+                font-size: 0.88rem;
+                line-height: 1.45;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
     with st.container(border=True):
+        if is_completed:
+            st.markdown(
+                '<div class="completed-deliverable-marker"></div>',
+                unsafe_allow_html=True,
+            )
+
+            st.markdown(
+                (
+                    '<div class="completed-deliverable-header">'
+                    '<div class="completed-deliverable-icon">✓</div>'
+                    '<div class="completed-deliverable-text">'
+                    "Deliverable concluído"
+                    "</div>"
+                    "</div>"
+                ),
+                unsafe_allow_html=True,
+            )
+
         header_col, priority_col = st.columns([3, 1])
 
         with header_col:
@@ -317,7 +420,22 @@ def deliverable_card(deliverable):
                 unsafe_allow_html=True,
             )
 
-        st.write(description)
+        if is_completed:
+            st.markdown(
+                (
+                    '<div class="completed-final-message">'
+                    '<div class="completed-final-message-title">'
+                    "Mensagem final"
+                    "</div>"
+                    '<div class="completed-final-message-text">'
+                    f"{description}"
+                    "</div>"
+                    "</div>"
+                ),
+                unsafe_allow_html=True,
+            )
+        else:
+            st.write(description)
 
         info_col1, info_col2 = st.columns(2)
 
