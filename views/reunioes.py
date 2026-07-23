@@ -555,7 +555,7 @@ def filter_completed_meetings(meetings):
     with participant_col:
         selected_participants = st.multiselect(
             "Participantes",
-            options=PARTICIPANTS_OPTIONS,
+            options=TEAM_MEMBERS,
             placeholder="Selecione um ou mais participantes",
             key="completed_meetings_participants",
         )
