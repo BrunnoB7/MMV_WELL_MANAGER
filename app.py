@@ -10,9 +10,7 @@ from views.cronograma import cronograma_page
 from views.documentos import documentos_page
 from views.fluxo_projeto import fluxo_projeto_page
 from views.reunioes import meetings_page
-from views.work_hours import (
-    work_hours_page,
-)
+from views.work_hours import work_hours_page
 
 # -------------------------------------------------------
 # CONFIGURAÇÃO DA PÁGINA
