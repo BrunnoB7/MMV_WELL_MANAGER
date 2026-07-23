@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import date
 from components.deliverable_card import deliverable_card
+from config.team import TEAM_MEMBERS
 from services.deliverable_service import DeliverableService
 
 
