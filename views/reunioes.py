@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 
 import streamlit as st
-
+from components.page_header import page_header
 from services.meeting_service import MeetingService
 from config.team import TEAM_MEMBERS
 
@@ -645,7 +645,10 @@ def filter_completed_meetings(meetings):
     return filtered
 
 def meetings_page():
-    load_meetings_css()
+    page_header(
+        title="👥 Reuniões",
+        subtitle="Planejamento, registro e acompanhamento das reuniões do projeto.",
+)
 
     if st.session_state.pop(
         "meeting_created",
@@ -654,19 +657,6 @@ def meetings_page():
         st.success(
             "Reunião cadastrada com sucesso."
         )
-
-    st.markdown(
-        (
-            '<div class="meetings-header">'
-            "<h1>👥 Reuniões</h1>"
-            "<p>"
-            "Planejamento, registro e acompanhamento "
-            "das reuniões do projeto."
-            "</p>"
-            "</div>"
-        ),
-        unsafe_allow_html=True,
-    )
 
     scheduled = MeetingService.get_scheduled()
     completed = MeetingService.get_completed()
