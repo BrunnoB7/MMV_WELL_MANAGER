@@ -114,6 +114,47 @@ def initialize_database():
 
     cursor.execute(
     """
+    CREATE TABLE IF NOT EXISTS deliverable_work_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        deliverable_id INTEGER NOT NULL,
+        collaborator TEXT NOT NULL,
+        worked_hours REAL NOT NULL,
+        work_date TEXT NOT NULL,
+        description TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (deliverable_id)
+            REFERENCES deliverables(id)
+            ON DELETE CASCADE
+    )
+    """
+)
+    cursor.execute(
+    """
+    CREATE INDEX IF NOT EXISTS
+        idx_work_logs_deliverable
+    ON deliverable_work_logs(deliverable_id)
+    """
+)
+
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS
+            idx_work_logs_collaborator
+        ON deliverable_work_logs(collaborator)
+        """
+    )
+    
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS
+            idx_work_logs_date
+        ON deliverable_work_logs(work_date)
+        """
+    )
+
+    cursor.execute(
+    """
     CREATE TABLE IF NOT EXISTS meetings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
