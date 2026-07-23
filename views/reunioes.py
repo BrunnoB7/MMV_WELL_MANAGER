@@ -658,6 +658,19 @@ def meetings_page():
             "Reunião cadastrada com sucesso."
         )
 
+    st.markdown(
+        (
+            '<div class="schedule-header">'
+            "<h1>📅 Cronograma de entregas</h1>"
+            "<p>"
+            "Acompanhamento das datas previstas para conclusão "
+            "das atividades do projeto."
+            "</p>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+    
     scheduled = MeetingService.get_scheduled()
     completed = MeetingService.get_completed()
 
