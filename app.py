@@ -127,11 +127,8 @@ elif selected == "Reuniões":
 
     meetings_page()
 
-elif selected == "Indicadores":
-
-    st.title("📊 Indicadores")
-
-    st.info("Em desenvolvimento")
+elif selected == "Horas trabalhadas":
+    work_hours_page()
 
 elif selected == "Configurações":
 
