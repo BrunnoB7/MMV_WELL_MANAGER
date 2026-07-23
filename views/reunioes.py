@@ -705,6 +705,29 @@ def meetings_page():
     st.write("")
 
     st.markdown(
+        '<div class="section-title">'
+        "📅 Reuniões agendadas"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+    if scheduled:
+        scheduled_columns = st.columns(2)
+
+        for index, meeting in enumerate(scheduled):
+            with scheduled_columns[index % 2]:
+                render_scheduled_meeting(meeting)
+
+    else:
+        st.info(
+            "Nenhuma reunião futura agendada."
+        )
+
+    st.divider()
+
+    st.write("")
+
+    st.markdown(
     '<div class="section-title">'
     "✅ Reuniões realizadas"
     "</div>",
@@ -743,18 +766,6 @@ def meetings_page():
     else:
         st.info(
             "Nenhuma reunião realizada cadastrada."
-        )
-
-    if scheduled:
-        scheduled_columns = st.columns(2)
-
-        for index, meeting in enumerate(scheduled):
-            with scheduled_columns[index % 2]:
-                render_scheduled_meeting(meeting)
-
-    else:
-        st.info(
-            "Nenhuma reunião futura agendada."
         )
 
     st.divider()
