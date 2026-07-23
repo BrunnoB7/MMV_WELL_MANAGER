@@ -49,7 +49,7 @@ def register_work_hours_dialog(
         or "Sem título"
     )
 
-    st.caption("Deliverable")
+    st.caption("Tarefa")
     st.write(f"**{deliverable_title}**")
 
     with st.form(
@@ -134,7 +134,7 @@ def register_work_hours_dialog(
     if not logs:
         st.info(
             "Nenhuma hora registrada para "
-            "este deliverable."
+            "esta tarefa."
         )
         return
 
