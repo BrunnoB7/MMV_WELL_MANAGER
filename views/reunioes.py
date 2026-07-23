@@ -480,6 +480,164 @@ def render_completed_meeting(meeting):
             )
 
 
+def filter_completed_meetings(meetings):
+    st.markdown("#### Filtros")
+
+    today = date.today()
+
+    meeting_dates = []
+
+    for meeting in meetings:
+        try:
+            meeting_dates.append(
+                date.fromisoformat(
+                    meeting["meeting_date"]
+                )
+            )
+        except (TypeError, ValueError):
+            continue
+
+    if meeting_dates:
+        default_start_date = min(meeting_dates)
+        default_end_date = max(meeting_dates)
+    else:
+        default_start_date = today.replace(
+            month=1,
+            day=1,
+        )
+        default_end_date = today
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        start_date_filter = st.date_input(
+            "Realizadas a partir de",
+            value=default_start_date,
+            format="DD/MM/YYYY",
+            key="completed_meetings_start_date",
+        )
+
+    with col2:
+        end_date_filter = st.date_input(
+            "Realizadas até",
+            value=default_end_date,
+            format="DD/MM/YYYY",
+            key="completed_meetings_end_date",
+        )
+
+    with col3:
+        minimum_duration = st.number_input(
+            "Duração mínima (min)",
+            min_value=0,
+            max_value=480,
+            value=0,
+            step=15,
+            key="completed_meetings_min_duration",
+        )
+
+    search_col, participant_col = st.columns(2)
+
+    with search_col:
+        search = st.text_input(
+            "Buscar reunião",
+            placeholder="Título ou descrição...",
+            key="completed_meetings_search",
+        )
+
+    participants = sorted(
+        {
+            participant.strip()
+            for meeting in meetings
+            for participant in str(
+                meeting.get("participants") or ""
+            ).replace(";", ",").split(",")
+            if participant.strip()
+        }
+    )
+
+    with participant_col:
+        selected_participant = st.selectbox(
+            "Participante",
+            ["Todos"] + participants,
+            key="completed_meetings_participant",
+        )
+
+    only_with_recording = st.checkbox(
+        "Mostrar somente reuniões com gravação",
+        value=False,
+        key="completed_meetings_with_recording",
+    )
+
+    if end_date_filter < start_date_filter:
+        st.warning(
+            "A data final não pode ser anterior "
+            "à data inicial."
+        )
+        return []
+
+    filtered = []
+
+    for meeting in meetings:
+        try:
+            meeting_date = date.fromisoformat(
+                meeting["meeting_date"]
+            )
+        except (TypeError, ValueError):
+            continue
+
+        if meeting_date < start_date_filter:
+            continue
+
+        if meeting_date > end_date_filter:
+            continue
+
+        try:
+            duration = int(
+                meeting.get("duration_minutes") or 0
+            )
+        except (TypeError, ValueError):
+            duration = 0
+
+        if duration < minimum_duration:
+            continue
+
+        if selected_participant != "Todos":
+            meeting_participants = [
+                participant.strip().lower()
+                for participant in str(
+                    meeting.get("participants") or ""
+                ).replace(";", ",").split(",")
+                if participant.strip()
+            ]
+
+            if (
+                selected_participant.lower()
+                not in meeting_participants
+            ):
+                continue
+
+        if only_with_recording:
+            recording_link = str(
+                meeting.get("recording_link") or ""
+            ).strip()
+
+            if not recording_link:
+                continue
+
+        if search:
+            searchable = (
+                f"{meeting.get('title') or ''} "
+                f"{meeting.get('description') or ''} "
+                f"{meeting.get('participants') or ''}"
+            ).lower()
+
+            if search.lower() not in searchable:
+                continue
+
+        filtered.append(meeting)
+
+    return filtered
+
 def meetings_page():
     load_meetings_css()
 
@@ -547,11 +705,47 @@ def meetings_page():
     st.write("")
 
     st.markdown(
-        '<div class="section-title">'
-        "📅 Reuniões agendadas"
-        "</div>",
-        unsafe_allow_html=True,
-    )
+    '<div class="section-title">'
+    "✅ Reuniões realizadas"
+    "</div>",
+    unsafe_allow_html=True,
+)
+
+    if completed:
+        with st.expander(
+            "🔎 Filtrar reuniões realizadas",
+            expanded=False,
+        ):
+            filtered_completed = (
+                filter_completed_meetings(
+                    completed
+                )
+            )
+    
+        st.caption(
+            f"{len(filtered_completed)} de "
+            f"{len(completed)} reunião(ões) exibida(s)."
+        )
+    
+        if filtered_completed:
+            completed_columns = st.columns(2)
+    
+            for index, meeting in enumerate(
+                filtered_completed
+            ):
+                with completed_columns[index % 2]:
+                    render_completed_meeting(meeting)
+    
+        else:
+            st.info(
+                "Nenhuma reunião encontrada para "
+                "os filtros selecionados."
+            )
+    
+    else:
+        st.info(
+            "Nenhuma reunião realizada cadastrada."
+        )
 
     if scheduled:
         scheduled_columns = st.columns(2)
