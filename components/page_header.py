@@ -1,6 +1,10 @@
 import html
 import streamlit as st
 
+# Gradiente azul
+# rgba(15, 52, 96, 0.96),
+# rgba(16, 86, 82, 0.90)
+
 
 def page_header(title: str, subtitle: str) -> None:
     safe_title = html.escape(title)
