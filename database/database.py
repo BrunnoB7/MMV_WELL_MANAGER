@@ -112,6 +112,24 @@ def initialize_database():
         ),
     )
 
+    cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS meetings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        meeting_date TEXT NOT NULL,
+        start_time TEXT NOT NULL,
+        duration_minutes INTEGER DEFAULT 60,
+        participants TEXT,
+        description TEXT,
+        recording_link TEXT,
+        status TEXT NOT NULL DEFAULT 'Agendada',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+    """
+)
+
     # =====================================================
     # TABELA DE PASTAS / DOCUMENTOS
     # =====================================================
