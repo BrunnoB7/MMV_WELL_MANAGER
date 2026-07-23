@@ -528,7 +528,7 @@ def fluxo_projeto_page():
     st.markdown(
         (
             '<div class="flow-page-header">'
-            '<h1>Fluxo do Projeto</h1>'
+            '<h1>🧩 Fluxo do Projeto</h1>'
             '<p>'
             'Acompanhamento da performance, integridade dos poços '
             'e suporte à operação segura.'
