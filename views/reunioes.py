@@ -21,8 +21,8 @@ def load_meetings_css():
             margin-bottom: 20px;
             background: linear-gradient(
                 135deg,
-                rgba(15, 52, 96, 0.96),
-                rgba(16, 86, 82, 0.90)
+                #7f0000,
+                #d71920
             );
             border: 1px solid rgba(128, 128, 128, 0.18);
         }
