@@ -3,7 +3,7 @@ from datetime import date, timedelta
 import altair as alt
 import pandas as pd
 import streamlit as st
-
+from components.page_header import page_header
 from config.team import TEAM_MEMBERS
 from services.work_hours_service import (
     WorkHoursService,
@@ -550,11 +550,9 @@ def render_collaborator_details(
 
 
 def work_hours_page():
-    st.title("⏱️ Horas trabalhadas")
-
-    st.caption(
-        "Acompanhamento das horas empregadas "
-        "em tarefas e participações em reuniões."
+    page_header(
+        title="⏱️ Horas trabalhadas",
+        subtitle="Levantamento das horas trabalhadas pela equipe."
     )
 
     all_entries = (
