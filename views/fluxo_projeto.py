@@ -561,7 +561,7 @@ def fluxo_projeto_page():
 
     st.divider()
 
-    st.caption(
-        "Para alterar a etapa atual, edite CURRENT_PHASE_ID "
-        "no início do arquivo views/fluxo_projeto.py."
-    )
+    # st.caption(
+    #     "Para alterar a etapa atual, edite CURRENT_PHASE_ID "
+    #     "no início do arquivo views/fluxo_projeto.py."
+    # )
