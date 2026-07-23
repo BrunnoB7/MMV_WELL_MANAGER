@@ -11,6 +11,15 @@ STATUS_COLORS = {
     "Cancelada": "#DC2626",
 }
 
+PARTICIPANTS_OPTIONS = [
+    "Bruno",
+    "Morgana",
+    "Libório",
+    "Luiz",
+    "Micaellen",
+    "Adriel",
+]
+
 
 def load_meetings_css():
     st.markdown(
@@ -182,15 +191,11 @@ def create_meeting_dialog():
                 step=15,
             )
 
-        participants = st.text_area(
+        selected_participants = st.multiselect(
             "Participantes",
-            placeholder=(
-                "Bruno, Matheus, Eric..."
-            ),
-            help=(
-                "Separe os participantes por vírgula."
-            ),
-        )
+            options=PARTICIPANTS_OPTIONS,
+            placeholder="Selecione os participantes",
+)
 
         status = st.selectbox(
             "Status",
@@ -225,7 +230,7 @@ def create_meeting_dialog():
                     meeting_date=meeting_date,
                     start_time=start_time,
                     duration_minutes=duration_minutes,
-                    participants=participants,
+                    participants=", ".join(selected_participants),
                     description=description,
                     recording_link=recording_link,
                     status=status,
@@ -306,11 +311,23 @@ def edit_meeting_dialog(meeting):
                 step=15,
             )
 
-        participants = st.text_area(
+
+        current_participants = [
+            participant.strip()
+            for participant in str(
+                meeting.get("participants") or "").replace(";", ",").split(",")
+            if participant.strip()
+        ]
+        
+        selected_participants = st.multiselect(
             "Participantes",
-            value=meeting.get(
-                "participants"
-            ) or "",
+            options=PARTICIPANTS_OPTIONS,
+            default=[
+                participant
+                for participant in current_participants
+                if participant in PARTICIPANTS_OPTIONS
+            ],
+            placeholder="Selecione os participantes",
         )
 
         status = st.selectbox(
@@ -366,7 +383,7 @@ def edit_meeting_dialog(meeting):
                     meeting_date=new_date,
                     start_time=new_start_time,
                     duration_minutes=duration_minutes,
-                    participants=participants,
+                    participants=", ".join(selected_participants),
                     description=description,
                     recording_link=recording_link,
                     status=status,
@@ -544,22 +561,12 @@ def filter_completed_meetings(meetings):
             key="completed_meetings_search",
         )
 
-    participants = sorted(
-        {
-            participant.strip()
-            for meeting in meetings
-            for participant in str(
-                meeting.get("participants") or ""
-            ).replace(";", ",").split(",")
-            if participant.strip()
-        }
-    )
-
     with participant_col:
-        selected_participant = st.selectbox(
-            "Participante",
-            ["Todos"] + participants,
-            key="completed_meetings_participant",
+        selected_participants = st.multiselect(
+            "Participantes",
+            options=PARTICIPANTS_OPTIONS,
+            placeholder="Selecione um ou mais participantes",
+            key="completed_meetings_participants",
         )
 
     only_with_recording = st.checkbox(
@@ -601,20 +608,28 @@ def filter_completed_meetings(meetings):
         if duration < minimum_duration:
             continue
 
-        if selected_participant != "Todos":
-            meeting_participants = [
+        if selected_participants:
+            meeting_participants = {
                 participant.strip().lower()
                 for participant in str(
                     meeting.get("participants") or ""
                 ).replace(";", ",").split(",")
                 if participant.strip()
-            ]
-
-            if (
-                selected_participant.lower()
-                not in meeting_participants
+            }
+        
+            selected_participants_lower = {
+                participant.lower()
+                for participant in selected_participants
+            }
+        
+            if not selected_participants_lower.issubset(
+                meeting_participants
             ):
                 continue
+
+            # if not selected_participants_lower.intersection(
+            #     meeting_participants):
+            #         continue
 
         if only_with_recording:
             recording_link = str(
