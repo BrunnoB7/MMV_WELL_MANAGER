@@ -709,18 +709,16 @@ def meetings_page():
     "✅ Reuniões realizadas"
     "</div>",
     unsafe_allow_html=True,
-)
-
+    )
     if completed:
         with st.expander(
             "🔎 Filtrar reuniões realizadas",
-            expanded=False,
-        ):
-            filtered_completed = (
-                filter_completed_meetings(
-                    completed
+            expanded=False,):
+                filtered_completed = (
+                    filter_completed_meetings(
+                        completed
+                    )
                 )
-            )
     
         st.caption(
             f"{len(filtered_completed)} de "
