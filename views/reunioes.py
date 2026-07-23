@@ -759,21 +759,3 @@ def meetings_page():
 
     st.divider()
 
-    st.markdown(
-        '<div class="section-title">'
-        "✅ Reuniões realizadas"
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
-    if completed:
-        completed_columns = st.columns(2)
-
-        for index, meeting in enumerate(completed):
-            with completed_columns[index % 2]:
-                render_completed_meeting(meeting)
-
-    else:
-        st.info(
-            "Nenhuma reunião realizada cadastrada."
-        )
