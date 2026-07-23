@@ -156,7 +156,7 @@ def deliverables_page():
     st.markdown(
         (
             '<div class="deliverables-header">'
-            '<h1>Tarefas</h1>'
+            '<h1>📝 Tarefas</h1>'
             '<p>'
             'Acompanhamento das entregas técnicas, prazos, '
             'responsáveis e progresso.'
