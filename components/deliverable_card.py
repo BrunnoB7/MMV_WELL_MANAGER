@@ -3,10 +3,12 @@ from datetime import date
 import streamlit as st
 
 from services.deliverable_service import DeliverableService
+
 from components.work_hours_dialog import (
     format_hours,
     register_work_hours_dialog,
 )
+
 from services.work_hours_service import (
     WorkHoursService,
 )
