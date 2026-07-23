@@ -3,6 +3,7 @@ from datetime import datetime
 import streamlit as st
 
 from services.document_service import DocumentService
+from components.page_header import page_header
 
 
 DISCIPLINES = [
@@ -30,70 +31,6 @@ def format_datetime(value):
 
     except ValueError:
         return value
-
-
-def load_css():
-    st.markdown(
-        """
-        <style>
-            .documents-header {
-                padding: 24px 28px;
-                margin-bottom: 20px;
-                border-radius: 14px;
-                background: linear-gradient(
-                    135deg,
-                    #7f0000,
-                    #d71920
-                );
-                color: white;
-            }
-
-            .documents-header h1 {
-                margin: 0;
-                font-size: 2rem;
-            }
-
-            .documents-header p {
-                margin: 7px 0 0 0;
-                opacity: 0.86;
-            }
-
-            .documents-summary {
-                margin: 8px 0 18px 0;
-                font-size: 0.88rem;
-                opacity: 0.72;
-            }
-
-            .document-discipline {
-                display: inline-block;
-                padding: 4px 10px;
-                margin-bottom: 10px;
-                border-radius: 14px;
-                background: rgba(215, 25, 32, 0.12);
-                color: #d71920;
-                font-size: 0.78rem;
-                font-weight: 700;
-            }
-
-            .document-description {
-                min-height: 70px;
-                margin: 8px 0 14px 0;
-                font-size: 0.90rem;
-                line-height: 1.45;
-                opacity: 0.78;
-            }
-
-            .document-info {
-                padding-top: 12px;
-                margin-top: 10px;
-                border-top: 1px solid rgba(128, 128, 128, 0.25);
-                font-size: 0.80rem;
-                line-height: 1.6;
-            }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 @st.dialog("Adicionar pasta", width="large")
@@ -356,7 +293,10 @@ def render_delete_confirmation():
 
 
 def documentos_page():
-    load_css()
+    page_header(
+        title="📁 Documentos",
+        subtitle="Acesso centralizado às pastas e documentos compartilhados no Google Drive.",
+    )
 
     if st.session_state.pop("folder_created", False):
         st.toast(
@@ -375,19 +315,6 @@ def documentos_page():
             "Cadastro excluído.",
             icon="🗑️",
         )
-
-    st.markdown(
-        (
-            '<div class="documents-header">'
-            '<h1>Documentos</h1>'
-            '<p>'
-            'Acesso centralizado às pastas e documentos '
-            'compartilhados no Google Drive.'
-            '</p>'
-            '</div>'
-        ),
-        unsafe_allow_html=True,
-    )
 
     top_col1, top_col2 = st.columns([1, 4])
 
