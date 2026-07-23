@@ -3,6 +3,13 @@ from datetime import date
 import streamlit as st
 
 from services.deliverable_service import DeliverableService
+from components.work_hours_dialog import (
+    format_hours,
+    register_work_hours_dialog,
+)
+from services.work_hours_service import (
+    WorkHoursService,
+)
 
 
 STATUS_COLORS = {
@@ -275,6 +282,20 @@ def deliverable_card(deliverable):
         "google_drive",
     )
 
+    deliverable_id = deliverable["id"]
+
+    worked_hours_total = (
+        WorkHoursService.get_deliverable_total(
+            deliverable_id
+        )
+    )
+    
+    worked_hours_summary = (
+        WorkHoursService.get_deliverable_summary(
+            deliverable_id
+        )
+    )
+
     is_completed = (
         str(status)
         .strip()
@@ -437,6 +458,27 @@ def deliverable_card(deliverable):
         else:
             st.write(description)
 
+        st.markdown("##### ⏱️ Horas empregadas")
+
+        st.markdown(
+            f"**Total: {format_hours(worked_hours_total)}**"
+        )
+        
+        if worked_hours_summary:
+            summary_text = " • ".join(
+                (
+                    f"{item['collaborator']}: "
+                    f"{format_hours(item['total_hours'])}"
+                )
+                for item in worked_hours_summary
+            )
+        
+            st.caption(summary_text)
+        else:
+            st.caption(
+                "Nenhuma hora registrada."
+            )
+        
         info_col1, info_col2 = st.columns(2)
 
         with info_col1:
@@ -447,7 +489,7 @@ def deliverable_card(deliverable):
             st.caption("Prazo")
             st.write(deadline)
 
-        button_col1, button_col2 = st.columns(2)
+        button_col1, button_col2, button_col3 = (st.columns(3))
 
         with button_col1:
             if st.button(
@@ -458,6 +500,15 @@ def deliverable_card(deliverable):
                 edit_deliverable_dialog(deliverable)
 
         with button_col2:
+            if st.button(
+                "⏱️ Registrar horas",
+                key=f"hours_{deliverable['id']}",
+                use_container_width=True,
+            ):
+                register_work_hours_dialog(
+                    deliverable
+                )
+        with button_col3:
             if google_drive:
                 st.link_button(
                     "📂 Google Drive",
