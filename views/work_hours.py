@@ -516,7 +516,7 @@ def render_collaborator_details(
         )
 
         stat3.metric(
-            "Média por tarefa,
+            "Média por tarefa",
             format_hours(
                 average_per_deliverable
             ),
