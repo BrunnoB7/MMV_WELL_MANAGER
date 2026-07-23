@@ -183,7 +183,7 @@ def deliverables_page():
 
     with button_col1:
         if st.button(
-                "➕ Novo deliverable",
+                "➕ Nova tarefa",
                 type="primary",
                 use_container_width=True,
         ):
