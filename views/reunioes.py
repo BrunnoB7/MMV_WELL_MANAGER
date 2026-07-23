@@ -315,7 +315,7 @@ def edit_meeting_dialog(meeting):
             default=[
                 participant
                 for participant in current_participants
-                if participant in PARTICIPANTS_OPTIONS
+                if participant in TEAM_MEMBERS
             ],
             placeholder="Selecione os participantes",
         )
