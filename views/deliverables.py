@@ -272,7 +272,7 @@ def deliverables_page():
         (
             '<div class="deliverables-summary">'
             f'{len(filtered)} de {len(deliverables)} '
-            'deliverables exibidos'
+            'tarefas exibidas'
             '</div>'
         ),
         unsafe_allow_html=True,
