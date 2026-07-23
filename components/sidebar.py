@@ -21,7 +21,7 @@ def show_sidebar():
                 # "Riscos",
                 "Reuniões",
                 # "Indicadores",
-                "Administração",
+                # "Administração",
             ],
 
             icons=[
@@ -34,7 +34,7 @@ def show_sidebar():
                 # "exclamation-triangle",
                 "journal-text",
                 # "graph-up",
-                "gear",
+                # "gear",
             ],
 
             default_index=0,
