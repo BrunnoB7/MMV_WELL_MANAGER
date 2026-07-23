@@ -3,6 +3,7 @@ from datetime import date, datetime, time
 import streamlit as st
 
 from services.meeting_service import MeetingService
+from config.team import TEAM_MEMBERS
 
 
 STATUS_COLORS = {
