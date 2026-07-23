@@ -661,11 +661,11 @@ def meetings_page():
 
     st.markdown(
         (
-            '<div class="schedule-header">'
-            "<h1>📅 Cronograma de entregas</h1>"
+            '<div class="meetings-header">'
+            "<h1>👥 Reuniões</h1>"
             "<p>"
-            "Acompanhamento das datas previstas para conclusão "
-            "das atividades do projeto."
+            "Planejamento, registro e acompanhamento "
+            "das reuniões do projeto."
             "</p>"
             "</div>"
         ),
