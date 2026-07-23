@@ -645,6 +645,7 @@ def filter_completed_meetings(meetings):
     return filtered
 
 def meetings_page():
+    load_meetings_css()
     page_header(
         title="👥 Reuniões",
         subtitle="Planejamento, registro e acompanhamento das reuniões do projeto.",
