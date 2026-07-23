@@ -6,6 +6,7 @@ import streamlit as st
 
 from database.database import get_connection
 from services.dashboard_service import DashboardService
+from services.meeting_service import MeetingService
 
 
 MONTH_NAMES = {
@@ -330,12 +331,20 @@ def select_calendar_date(selected_date):
 def build_day_label(
     current_date,
     activity_count,
+    meeting_count,
     project_end_date,
 ):
     labels = [str(current_date.day)]
 
     if activity_count:
-        labels.append(f"● {activity_count}")
+        labels.append(
+            f"● {activity_count} entrega(s)"
+        )
+
+    if meeting_count:
+        labels.append(
+            f"👥 {meeting_count}"
+        )
 
     if project_end_date == current_date:
         labels.append("🏁")
@@ -348,6 +357,7 @@ def build_day_label(
 
 def render_calendar(
     deliverables_by_date,
+    meetings_by_date,
     project_end_date,
 ):
     display_year = st.session_state.schedule_display_year
@@ -483,9 +493,17 @@ def render_calendar(
 
                 activity_count = len(activities)
 
+                meetings = meetings_by_date.get(
+                    current_date,
+                    [],
+                )
+                
+                meeting_count = len(meetings)
+
                 label = build_day_label(
                     current_date=current_date,
                     activity_count=activity_count,
+                    meeting_count=meeting_count,
                     project_end_date=project_end_date,
                 )
 
@@ -565,6 +583,7 @@ def render_activity_card(activity):
 
 def render_selected_date_activities(
     deliverables_by_date,
+    meetings_by_date,
     project_end_date,
 ):
     selected_date = st.session_state.schedule_selected_date
@@ -579,6 +598,11 @@ def render_selected_date_activities(
         return
 
     activities = deliverables_by_date.get(
+        selected_date,
+        [],
+    )
+
+    meetings = meetings_by_date.get(
         selected_date,
         [],
     )
@@ -607,10 +631,61 @@ def render_selected_date_activities(
             unsafe_allow_html=True,
         )
 
-    if not activities:
+    if meetings:
+        st.markdown(
+            (
+                '<div class="selected-date-title" '
+                'style="margin-top:20px;">'
+                "👥 Reuniões do dia"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+    
+        for meeting in meetings:
+            status = (
+                meeting.get("status")
+                or "Agendada"
+            )
+    
+            st.markdown(
+                (
+                    '<div class="activity-card">'
+                    '<div class="activity-card-title">'
+                    f'👥 {meeting.get("title") or "Sem título"}'
+                    "</div>"
+                    '<div class="activity-card-details">'
+                    f'<strong>Horário:</strong> '
+                    f'{str(meeting.get("start_time") or "-")[:5]}<br>'
+                    f'<strong>Duração:</strong> '
+                    f'{meeting.get("duration_minutes") or 0} minutos<br>'
+                    f'<strong>Participantes:</strong> '
+                    f'{meeting.get("participants") or "Não informados"}<br>'
+                    f'<strong>Status:</strong> {status}'
+                    "</div>"
+                    "</div>"
+                ),
+                unsafe_allow_html=True,
+            )
+    
+            recording_link = meeting.get(
+                "recording_link"
+            )
+    
+            if recording_link:
+                st.link_button(
+                    "▶️ Abrir gravação",
+                    recording_link,
+                    key=(
+                        "calendar_recording_"
+                        f"{meeting['id']}"
+                    ),
+                )
+
+    if not activities and not meetings:
         st.info(
-            "Não existem atividades cadastradas para entrega "
-            "nesta data."
+            "Não existem entregas ou reuniões "
+            "cadastradas para esta data."
         )
         return
 
@@ -705,6 +780,33 @@ def render_upcoming_deliveries(deliverables):
         )
 
 
+
+def group_meetings_by_date(meetings):
+    grouped = {}
+
+    for meeting in meetings:
+        if (
+            str(meeting.get("status") or "")
+            .strip()
+            .lower()
+            == "cancelada"
+        ):
+            continue
+
+        meeting_date = parse_database_date(
+            meeting.get("meeting_date")
+        )
+
+        if meeting_date is None:
+            continue
+
+        if meeting_date not in grouped:
+            grouped[meeting_date] = []
+
+        grouped[meeting_date].append(meeting)
+
+    return grouped
+
 def cronograma_page():
     load_schedule_css()
 
@@ -719,6 +821,10 @@ def cronograma_page():
     deliverables_by_date = group_deliverables_by_date(
         deliverables
     )
+
+    meetings = MeetingService.get_all()
+
+    meetings_by_date = group_meetings_by_date(meetings)
 
     initialize_calendar_state(
         deliverables=deliverables,
@@ -808,11 +914,13 @@ def cronograma_page():
     with st.container(border=True):
         render_calendar(
             deliverables_by_date=deliverables_by_date,
+            meetings_by_date=meetings_by_date,
             project_end_date=project_end_date,
         )
 
     render_selected_date_activities(
         deliverables_by_date=deliverables_by_date,
+        meetings_by_date=meetings_by_date,
         project_end_date=project_end_date,
     )
 
