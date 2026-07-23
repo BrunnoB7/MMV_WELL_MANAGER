@@ -1,7 +1,6 @@
 from datetime import date, datetime, time
 
 import streamlit as st
-from components.page_header import page_header
 from services.meeting_service import MeetingService
 from config.team import TEAM_MEMBERS
 
@@ -646,10 +645,6 @@ def filter_completed_meetings(meetings):
 
 def meetings_page():
     load_meetings_css()
-    page_header(
-        title="👥 Reuniões",
-        subtitle="Planejamento, registro e acompanhamento das reuniões do projeto.",
-)
 
     if st.session_state.pop(
         "meeting_created",
