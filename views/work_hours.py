@@ -9,6 +9,10 @@ from services.work_hours_service import (
     WorkHoursService,
 )
 
+SOURCE_LABELS = {
+    "Deliverables": "Tarefas",
+    "Reuniões": "Reuniões",
+}
 
 def format_hours(value):
     try:
@@ -332,7 +336,7 @@ def render_collaborator_details(
     )
 
     metric2.metric(
-        "Deliverables",
+        "Tarefas",
         (
             f"{format_hours(deliverable_hours)} "
             f"em {deliverable_count}"
@@ -349,7 +353,7 @@ def render_collaborator_details(
 
     tab1, tab2, tab3 = st.tabs(
         [
-            "📦 Deliverables",
+            "📦 Tarefas",
             "👥 Reuniões",
             "📊 Estatísticas",
         ]
@@ -359,7 +363,7 @@ def render_collaborator_details(
         if deliverable_data.empty:
             st.info(
                 "Nenhuma hora registrada em "
-                "deliverables."
+                "Tarefas."
             )
         else:
             deliverable_table = (
@@ -391,7 +395,7 @@ def render_collaborator_details(
             deliverable_table.rename(
                 columns={
                     "work_date": "Data",
-                    "title": "Deliverable",
+                    "title": "Tarefa",
                     "discipline": "Disciplina",
                     "worked_hours": "Horas",
                     "description": "Descrição",
@@ -496,7 +500,7 @@ def render_collaborator_details(
         )
 
         stat1.metric(
-            "% em deliverables",
+            "% em tarefas",
             (
                 f"{deliverable_percentage:.1f}%"
                 .replace(".", ",")
@@ -512,7 +516,7 @@ def render_collaborator_details(
         )
 
         stat3.metric(
-            "Média por deliverable",
+            "Média por tarefa,
             format_hours(
                 average_per_deliverable
             ),
@@ -537,7 +541,7 @@ def render_collaborator_details(
 
             st.markdown(
                 (
-                    "**Deliverable com maior "
+                    "**Tarefa com maior "
                     "dedicação:** "
                     f"{top_deliverable['title']} "
                     f"— {format_hours(top_deliverable['worked_hours'])}"
@@ -550,7 +554,7 @@ def work_hours_page():
 
     st.caption(
         "Acompanhamento das horas empregadas "
-        "em deliverables e participações em reuniões."
+        "em tarefas e participações em reuniões."
     )
 
     all_entries = (
@@ -606,19 +610,21 @@ def work_hours_page():
             )
 
         with filter_col4:
-            selected_sources = (
-                st.multiselect(
-                    "Origem das horas",
-                    options=[
-                        "Deliverables",
-                        "Reuniões",
-                    ],
-                    default=[
-                        "Deliverables",
-                        "Reuniões",
-                    ],
-                    key="work_hours_sources",
-                )
+            selected_sources = st.multiselect(
+                "Origem das horas",
+                options=[
+                    "Deliverables",
+                    "Reuniões",
+                ],
+                default=[
+                    "Deliverables",
+                    "Reuniões",
+                ],
+                format_func=lambda source: SOURCE_LABELS.get(
+                    source,
+                    source,
+                ),
+                key="work_hours_sources",
             )
 
     if end_date < start_date:
@@ -705,7 +711,7 @@ def work_hours_page():
     )
 
     metric2.metric(
-        "Deliverables",
+        "Tarefas",
         format_hours(deliverable_hours),
     )
 
