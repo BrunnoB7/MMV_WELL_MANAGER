@@ -21,7 +21,7 @@ class WorkHoursService:
     ):
         if not deliverable_id:
             raise ValueError(
-                "Deliverable não informado."
+                "Tarefa não informada."
             )
 
         if collaborator not in TEAM_MEMBERS:
