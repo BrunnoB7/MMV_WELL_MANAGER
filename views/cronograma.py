@@ -691,7 +691,7 @@ def render_selected_date_activities(
 
     st.markdown(
             (
-                '<div class="selected-date-title" '
+                '<div class="selected-date-activities" '
                 'style="margin-top:20px;">'
                 f"📝 {len(activities)} atividade(s) prevista(s) para esta data."
                 "</div>"
