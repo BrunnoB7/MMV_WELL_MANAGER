@@ -12,16 +12,6 @@ STATUS_COLORS = {
     "Cancelada": "#DC2626",
 }
 
-PARTICIPANTS_OPTIONS = [
-    "Bruno",
-    "Morgana",
-    "Libório",
-    "Luiz",
-    "Micaellen",
-    "Adriel",
-]
-
-
 def load_meetings_css():
     st.markdown(
         """
@@ -194,7 +184,7 @@ def create_meeting_dialog():
 
         selected_participants = st.multiselect(
             "Participantes",
-            options=PARTICIPANTS_OPTIONS,
+            options=TEAM_MEMBERS,
             placeholder="Selecione os participantes",
 )
 
@@ -322,7 +312,7 @@ def edit_meeting_dialog(meeting):
         
         selected_participants = st.multiselect(
             "Participantes",
-            options=PARTICIPANTS_OPTIONS,
+            options=options=TEAM_MEMBERS,
             default=[
                 participant
                 for participant in current_participants
