@@ -9,6 +9,7 @@ from views.dashboard import dashboard
 from views.cronograma import cronograma_page
 from views.documentos import documentos_page
 from views.fluxo_projeto import fluxo_projeto_page
+from views.reunioes import meetings_page
 
 # -------------------------------------------------------
 # CONFIGURAÇÃO DA PÁGINA
@@ -121,9 +122,7 @@ elif selected == "Riscos":
 
 elif selected == "Reuniões":
 
-    st.title("📝 Reuniões")
-
-    st.info("Em desenvolvimento")
+    meetings_page()
 
 elif selected == "Indicadores":
 
