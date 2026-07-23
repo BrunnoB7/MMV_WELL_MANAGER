@@ -312,7 +312,7 @@ def edit_meeting_dialog(meeting):
         
         selected_participants = st.multiselect(
             "Participantes",
-            options=options=TEAM_MEMBERS,
+            options=TEAM_MEMBERS,
             default=[
                 participant
                 for participant in current_participants
