@@ -689,10 +689,20 @@ def render_selected_date_activities(
         )
         return
 
-    st.caption(
-        f"{len(activities)} atividade(s) prevista(s) "
-        "para esta data."
-    )
+    st.markdown(
+            (
+                '<div class="selected-date-title" '
+                'style="margin-top:20px;">'
+                f"📝 {len(activities)} atividade(s) prevista(s) para esta data."
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+    
+    # st.caption(
+    #     f"{len(activities)} atividade(s) prevista(s) "
+    #     "para esta data."
+    # )
 
     for activity in activities:
         render_activity_card(activity)
