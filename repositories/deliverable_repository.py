@@ -103,7 +103,25 @@ class DeliverableRepository:
         conn.commit()
 
         conn.close()
-
+        
+    @staticmethod
+    def delete(deliverable_id):
+        connection = get_connection()
+    
+        try:
+            connection.execute(
+                """
+                DELETE FROM deliverables
+                WHERE id = ?
+                """,
+                (deliverable_id,),
+            )
+    
+            conn.commit()
+    
+        finally:
+            conn.close()
+            
     @staticmethod
     def update(
         deliverable_id,
