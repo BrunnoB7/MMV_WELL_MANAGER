@@ -389,7 +389,7 @@ def dashboard():
 
     with c1:
         metric_card(
-            "Tarefass",
+            "Tarefas",
             kpis["total"],
             "Total cadastrado",
             "📋",
