@@ -560,7 +560,7 @@ def deliverable_card(deliverable):
             st.caption("Prazo")
             st.write(deadline)
 
-        button_col1, button_col2, button_col3 = (st.columns(3))
+        button_col1, button_col2, button_col3, button_col4 = (st.columns(4))
 
         with button_col1:
             if st.button(
@@ -592,4 +592,13 @@ def deliverable_card(deliverable):
                     key=f"no_drive_{deliverable['id']}",
                     disabled=True,
                     use_container_width=True,
+                )
+        with button_col4:
+            if st.button(
+                "🗑️ Excluir",
+                key=f"delete_{deliverable['id']}",
+                use_container_width=True,
+            ):
+                delete_deliverable_dialog(
+                    deliverable
                 )
