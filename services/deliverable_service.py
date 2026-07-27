@@ -114,6 +114,17 @@ class DeliverableService:
         )
 
     @staticmethod
+    def delete_deliverable(deliverable_id):
+        if not deliverable_id:
+            raise ValueError(
+                "Tarefa não informada."
+            )
+    
+        DeliverableRepository.delete(
+            deliverable_id
+        )
+    
+    @staticmethod
     def update_deliverable(
         deliverable_id,
         title,
