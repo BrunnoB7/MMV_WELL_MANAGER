@@ -359,8 +359,7 @@ def dashboard():
 
         st.progress(progress / 100)
         st.caption(
-            f"{progress}% concluído com base na média "
-            "dos deliverables."
+            f"{progress}% concluído com base nas tarefas atuais."
         )
 
     # with dates_col:
