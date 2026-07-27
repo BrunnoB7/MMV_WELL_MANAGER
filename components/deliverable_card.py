@@ -217,6 +217,75 @@ def edit_deliverable_dialog(deliverable):
                 )
 
 
+@st.dialog("Excluir tarefa")
+def delete_deliverable_dialog(deliverable):
+
+    st.warning(
+        "Esta ação não poderá ser desfeita."
+    )
+
+    st.write(
+        "Você está prestes a excluir a tarefa:"
+    )
+
+    st.markdown(
+        f"**{deliverable['title']}**"
+    )
+
+    st.caption(
+        "Os registros de horas associados a esta "
+        "tarefa também poderão ser excluídos."
+    )
+
+    confirm_delete = st.checkbox(
+        "Confirmo que desejo excluir esta tarefa.",
+        key=(
+            "confirm_delete_deliverable_"
+            f"{deliverable['id']}"
+        ),
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button(
+            "Cancelar",
+            key=(
+                "cancel_delete_deliverable_"
+                f"{deliverable['id']}"
+            ),
+            use_container_width=True,
+        ):
+            st.rerun()
+
+    with col2:
+        if st.button(
+            "🗑️ Excluir tarefa",
+            key=(
+                "confirm_delete_button_"
+                f"{deliverable['id']}"
+            ),
+            type="primary",
+            disabled=not confirm_delete,
+            use_container_width=True,
+        ):
+            try:
+                DeliverableService.delete_deliverable(
+                    deliverable["id"]
+                )
+
+                st.session_state[
+                    "deliverable_deleted"
+                ] = True
+
+                st.rerun()
+
+            except Exception as error:
+                st.error(
+                    f"Erro ao excluir tarefa: {error}"
+                )
+
+
 def deliverable_card(deliverable):
     status = safe_value(
         deliverable,
