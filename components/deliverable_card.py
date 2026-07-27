@@ -217,39 +217,39 @@ def edit_deliverable_dialog(deliverable):
                 )
         st.divider()
 
-st.markdown("#### Zona de exclusão")
-
-st.warning(
-    "A exclusão da tarefa é permanente. "
-    "Os registros de horas associados também serão removidos."
-)
-
-confirm_delete = st.checkbox(
-    "Confirmo que desejo excluir esta tarefa.",
-    key=f"confirm_delete_{deliverable['id']}",
-)
-
-if st.button(
-    "🗑️ Excluir tarefa",
-    key=f"delete_deliverable_{deliverable['id']}",
-    disabled=not confirm_delete,
-    use_container_width=True,
-):
-    try:
-        DeliverableService.delete_deliverable(
-            deliverable["id"]
-        )
-
-        st.session_state[
-            "deliverable_deleted"
-        ] = True
-
-        st.rerun()
-
-    except Exception as error:
-        st.error(
-            f"Erro ao excluir tarefa: {error}"
-        )
+    st.markdown("#### Zona de exclusão")
+    
+    st.warning(
+        "A exclusão da tarefa é permanente. "
+        "Os registros de horas associados também serão removidos."
+    )
+    
+    confirm_delete = st.checkbox(
+        "Confirmo que desejo excluir esta tarefa.",
+        key=f"confirm_delete_{deliverable['id']}",
+    )
+    
+    if st.button(
+        "🗑️ Excluir tarefa",
+        key=f"delete_deliverable_{deliverable['id']}",
+        disabled=not confirm_delete,
+        use_container_width=True,
+    ):
+        try:
+            DeliverableService.delete_deliverable(
+                deliverable["id"]
+            )
+    
+            st.session_state[
+                "deliverable_deleted"
+            ] = True
+    
+            st.rerun()
+    
+        except Exception as error:
+            st.error(
+                f"Erro ao excluir tarefa: {error}"
+            )
 
 
 @st.dialog("Excluir tarefa")
