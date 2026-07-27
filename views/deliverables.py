@@ -153,6 +153,12 @@ def deliverables_page():
             icon="✅",
         )
 
+    if st.session_state.pop("deliverable_deleted",False,):
+        st.toast(
+            "Tarefa excluída com sucesso.",
+            icon="🗑️",
+        )
+
     st.markdown(
         (
             '<div class="deliverables-header">'
