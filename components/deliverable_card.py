@@ -215,6 +215,41 @@ def edit_deliverable_dialog(deliverable):
                 st.error(
                     f"Erro ao atualizar deliverable: {error}"
                 )
+        st.divider()
+
+st.markdown("#### Zona de exclusão")
+
+st.warning(
+    "A exclusão da tarefa é permanente. "
+    "Os registros de horas associados também serão removidos."
+)
+
+confirm_delete = st.checkbox(
+    "Confirmo que desejo excluir esta tarefa.",
+    key=f"confirm_delete_{deliverable['id']}",
+)
+
+if st.button(
+    "🗑️ Excluir tarefa",
+    key=f"delete_deliverable_{deliverable['id']}",
+    disabled=not confirm_delete,
+    use_container_width=True,
+):
+    try:
+        DeliverableService.delete_deliverable(
+            deliverable["id"]
+        )
+
+        st.session_state[
+            "deliverable_deleted"
+        ] = True
+
+        st.rerun()
+
+    except Exception as error:
+        st.error(
+            f"Erro ao excluir tarefa: {error}"
+        )
 
 
 @st.dialog("Excluir tarefa")
@@ -560,7 +595,7 @@ def deliverable_card(deliverable):
             st.caption("Prazo")
             st.write(deadline)
 
-        button_col1, button_col2, button_col3, button_col4 = (st.columns(4))
+        button_col1, button_col2, button_col3 = (st.columns(3))
 
         with button_col1:
             if st.button(
@@ -592,13 +627,4 @@ def deliverable_card(deliverable):
                     key=f"no_drive_{deliverable['id']}",
                     disabled=True,
                     use_container_width=True,
-                )
-        with button_col4:
-            if st.button(
-                "🗑️ Excluir",
-                key=f"delete_{deliverable['id']}",
-                use_container_width=True,
-            ):
-                delete_deliverable_dialog(
-                    deliverable
                 )
