@@ -42,47 +42,21 @@ def load_css():
                 color: white;
             }
 
-            .documents-header h1 {
+            .hours-header h1 {
                 margin: 0;
                 font-size: 2rem;
+                font-weight: 700;
             }
 
-            .documents-header p {
+            .hours-header p {
                 margin: 7px 0 0 0;
                 opacity: 0.86;
             }
 
-            .documents-summary {
+            .hours-summary {
                 margin: 8px 0 18px 0;
                 font-size: 0.88rem;
                 opacity: 0.72;
-            }
-
-            .document-discipline {
-                display: inline-block;
-                padding: 4px 10px;
-                margin-bottom: 10px;
-                border-radius: 14px;
-                background: rgba(215, 25, 32, 0.12);
-                color: #d71920;
-                font-size: 0.78rem;
-                font-weight: 700;
-            }
-
-            .document-description {
-                min-height: 70px;
-                margin: 8px 0 14px 0;
-                font-size: 0.90rem;
-                line-height: 1.45;
-                opacity: 0.78;
-            }
-
-            .document-info {
-                padding-top: 12px;
-                margin-top: 10px;
-                border-top: 1px solid rgba(128, 128, 128, 0.25);
-                font-size: 0.80rem;
-                line-height: 1.6;
             }
         </style>
         """,
@@ -268,7 +242,8 @@ def render_source_composition_chart(
 
 
 def render_time_evolution_chart(
-    dataframe
+    dataframe,
+    grouping,
 ):
     if dataframe.empty:
         st.info(
@@ -283,47 +258,105 @@ def render_time_evolution_chart(
         subset=["work_date"]
     )
 
-    chart_data["month"] = (
-        chart_data["work_date"]
-        .dt.to_period("M")
-        .dt.to_timestamp()
-    )
+    if chart_data.empty:
+        st.info(
+            "Não existem datas válidas para "
+            "gerar o gráfico."
+        )
+        return
 
-    chart_data = (
-        chart_data.groupby(
-            "month",
-            as_index=False,
-        )["worked_hours"]
-        .sum()
-    )
+    if grouping == "Dia":
+        chart_data["period"] = (
+            chart_data["work_date"]
+            .dt.normalize()
+        )
+
+        chart_data = (
+            chart_data.groupby(
+                "period",
+                as_index=False,
+            )["worked_hours"]
+            .sum()
+            .sort_values("period")
+        )
+
+        x_title = "Dia"
+        date_format = "%d/%m/%Y"
+
+        tooltip = [
+            alt.Tooltip(
+                "period:T",
+                title="Data",
+                format="%d/%m/%Y",
+            ),
+            alt.Tooltip(
+                "worked_hours:Q",
+                title="Horas",
+                format=".1f",
+            ),
+        ]
+
+    else:
+        chart_data["period"] = (
+            chart_data["work_date"]
+            .dt.to_period("W-SUN")
+            .dt.start_time
+        )
+
+        chart_data = (
+            chart_data.groupby(
+                "period",
+                as_index=False,
+            )["worked_hours"]
+            .sum()
+            .sort_values("period")
+        )
+
+        chart_data["week_end"] = (
+            chart_data["period"]
+            + pd.Timedelta(days=6)
+        )
+
+        chart_data["period_label"] = (
+            chart_data["period"]
+            .dt.strftime("%d/%m/%Y")
+            + " a "
+            + chart_data["week_end"]
+            .dt.strftime("%d/%m/%Y")
+        )
+
+        x_title = "Semana"
+        date_format = "%d/%m"
+
+        tooltip = [
+            alt.Tooltip(
+                "period_label:N",
+                title="Semana",
+            ),
+            alt.Tooltip(
+                "worked_hours:Q",
+                title="Horas",
+                format=".1f",
+            ),
+        ]
 
     chart = (
         alt.Chart(chart_data)
         .mark_line(point=True)
         .encode(
             x=alt.X(
-                "month:T",
-                title="Mês",
+                "period:T",
+                title=x_title,
                 axis=alt.Axis(
-                    format="%m/%Y"
+                    format=date_format,
+                    labelAngle=-45,
                 ),
             ),
             y=alt.Y(
                 "worked_hours:Q",
                 title="Horas trabalhadas",
             ),
-            tooltip=[
-                alt.Tooltip(
-                    "month:T",
-                    title="Mês",
-                    format="%m/%Y",
-                ),
-                alt.Tooltip(
-                    "worked_hours:Q",
-                    title="Horas",
-                    format=".1f",
-                ),
-            ],
+            tooltip=tooltip,
         )
         .properties(height=320)
     )
@@ -332,7 +365,6 @@ def render_time_evolution_chart(
         chart,
         use_container_width=True,
     )
-
 
 def render_collaborator_details(
     dataframe,
@@ -821,12 +853,29 @@ def work_hours_page():
         )
 
     with chart_col2:
-        st.subheader(
-            "Evolução das horas"
+        title_col, grouping_col = st.columns(
+            [2, 1]
         )
-
+    
+        with title_col:
+            st.subheader(
+                "Evolução das horas"
+            )
+    
+        with grouping_col:
+            evolution_grouping = st.selectbox(
+                "Agrupar por",
+                options=[
+                    "Dia",
+                    "Semana",
+                ],
+                index=1,
+                key="work_hours_evolution_grouping",
+            )
+    
         render_time_evolution_chart(
-            dataframe
+            dataframe=dataframe,
+            grouping=evolution_grouping,
         )
 
     st.divider()
