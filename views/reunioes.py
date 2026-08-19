@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 import streamlit as st
 from services.meeting_service import MeetingService
@@ -505,14 +505,14 @@ def filter_completed_meetings(meetings):
             continue
 
     if meeting_dates:
-        default_start_date = min(meeting_dates)-7
-        default_end_date = max(meeting_dates)+7
+        default_start_date = min(meeting_dates) - timedelta(days=7)
+        default_end_date = max(meeting_dates) + timedelta(days=7)
     else:
         default_start_date = today.replace(
             month=1,
             day=1,
         )
-        default_end_date = today+7
+        default_end_date = today
 
     col1, col2, col3 = st.columns(3)
 
