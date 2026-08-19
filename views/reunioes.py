@@ -512,7 +512,7 @@ def filter_completed_meetings(meetings):
             month=1,
             day=1,
         )
-        default_end_date = today
+        default_end_date = today+7
 
     col1, col2, col3 = st.columns(3)
 
