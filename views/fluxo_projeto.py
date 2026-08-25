@@ -452,7 +452,7 @@ def render_current_phase_details():
             st.write(current_phase["description"])
 
     with col2:
-        with st.container(border=True):
+        with st.container(border=True, height=50):
             st.markdown(
                 '<div class="detail-label">Responsável</div>',
                 unsafe_allow_html=True,
