@@ -12,7 +12,7 @@ PROJECT_FLOW = [
     {
         "id": 1,
         "title": "Baseline e Indicadores",
-        "short_title": "Baseline",
+        "short_title": "Organização dos Dadodos do poço",
         "group": "Antes da injeção",
         "description": (
             "Estabelecimento da baseline técnica e definição dos "
