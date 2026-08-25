@@ -12,7 +12,7 @@ def show_sidebar():
             menu_title=None,
 
             options=[
-                "Dashboard",
+                "Visão Geral",
                 "Fluxo do Projeto",
                 "Tarefas",
                 "Cronograma",
