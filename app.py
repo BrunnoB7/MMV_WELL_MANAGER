@@ -93,7 +93,7 @@ render_database_backup()
 # PÁGINAS
 # -------------------------------------------------------
 
-if selected == "Dashboard":
+if selected == "Visão Geral":
     dashboard()
 
 elif selected == "Tarefas":
