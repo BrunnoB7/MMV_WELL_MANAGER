@@ -6,7 +6,7 @@ import streamlit as st
 # =========================================================
 
 # Altere este número para definir a etapa atual do projeto.
-CURRENT_PHASE_ID = 1
+CURRENT_PHASE_ID = 3
 
 PROJECT_FLOW = [
     {
