@@ -11,64 +11,52 @@ CURRENT_PHASE_ID = 1
 PROJECT_FLOW = [
     {
         "id": 1,
-        "title": "Baseline e Indicadores",
-        "short_title": "Organização dos Dadodos do poço",
+        "title": "Organização inicial dos dados dos poços",
+        "short_title": "Dados dos poços",
         "group": "Antes da injeção",
         "description": (
-            "Estabelecimento da baseline técnica e definição dos "
-            "indicadores de performance e integridade dos poços."
+            "Criar base de dados com as informações dos poço, "
+            "de modo a ser rastreável e servir de base para todos os estudos."
         ),
-        "responsible": "Equipe de Performance e Integridade",
-        "deliverable": "Relatório de Baseline e matriz de indicadores do MMV para poço",
+        "responsible": "Poço e integridade",
+        "deliverable": "Banco de dados com organizção documental",
     },
     {
         "id": 2,
-        "title": "Dashboard de acompanhamento",
-        "short_title": "Dashboard",
+        "title": "Definição de limites operacionais",
+        "short_title": "Limites operacionais",
         "group": "Antes da injeção",
         "description": (
-            "Desenvolvimento do painel para acompanhamento dos "
-            "parâmetros operacionais, de performance e de injeção."
+            "Desenvolvimento do do envelope operacional do poço, "
+            "a fim de estabelecer os limites seguros de operação."
         ),
-        "responsible": "Coordenação do projeto",
-        "deliverable": "Dashboard de acompanhamento operacional",
+        "responsible": "Poço e integridade",
+        "deliverable": "Documento com envelope operacional do poço",
     },
     {
         "id": 3,
-        "title": "Ações de contingência",
-        "short_title": "Contingência",
+        "title": "Procedimento de operação e contingência",
+        "short_title": "Procedimentos",
         "group": "Antes da injeção",
         "description": (
-            "Definição das ações e procedimentos de contingência "
-            "aplicáveis aos possíveis desvios operacionais."
+            "Elaboração dos procedimentos de operação normal do poço "
+            "e em casos de anomalia."
         ),
-        "responsible": "Equipe técnica",
-        "deliverable": "Plano de ações de contingência",
+        "responsible": "Poçoo e integridade",
+        "deliverable": "Procedimentos de operação do poço",
     },
     {
         "id": 4,
-        "title": "Integridade das barreiras",
-        "short_title": "Integridade",
+        "title": "Plano de avaliação da integridade do poço",
+        "short_title": "Plano de avaliação da integridade",
         "group": "Antes da injeção",
         "description": (
-            "Definição dos critérios para avaliação da integridade "
-            "das barreiras de segurança dos poços."
+            "Estabelecer plano de avaliação da integridade do poço. "
         ),
         "responsible": "Equipe de Integridade",
         "deliverable": "Critérios de avaliação das barreiras",
     },
-    {
-        "id": 5,
-        "title": "Programa de monitoramento",
-        "short_title": "Monitoramento",
-        "group": "Antes da injeção",
-        "description": (
-            "Elaboração do programa de monitoramento dos poços "
-            "injetor e monitor."
-        ),
-        "responsible": "Equipe de Monitoramento",
-        "deliverable": "Programa de monitoramento dos poços",
-    },
+
 ]
 
 OPERATION_FLOW = [
