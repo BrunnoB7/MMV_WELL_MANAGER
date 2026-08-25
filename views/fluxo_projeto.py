@@ -42,7 +42,7 @@ PROJECT_FLOW = [
             "Elaboração dos procedimentos de operação normal do poço "
             "e em casos de anomalia."
         ),
-        "responsible": "Poçoo e integridade",
+        "responsible": "Poço e integridade",
         "deliverable": "Procedimentos de operação do poço",
     },
     {
