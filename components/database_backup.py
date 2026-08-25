@@ -255,6 +255,7 @@ def render_database_backup():
                     "O aplicativo poderá reiniciar para "
                     "realizar o novo deploy."
                 )
+                st.rerun()
 
                 # if result["commit_url"]:
                 #     st.link_button(
