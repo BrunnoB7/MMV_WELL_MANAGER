@@ -444,7 +444,7 @@ def render_current_phase_details():
     col1, col2, col3 = st.columns([1.5, 1, 1.2])
 
     with col1:
-        with st.container(border=True, height=250):
+        with st.container(border=True, height=150):
             st.markdown(
                 '<div class="detail-label">Descrição</div>',
                 unsafe_allow_html=True,
@@ -452,7 +452,7 @@ def render_current_phase_details():
             st.write(current_phase["description"])
 
     with col2:
-        with st.container(border=True, height=250):
+        with st.container(border=True, height=150):
             st.markdown(
                 '<div class="detail-label">Responsável</div>',
                 unsafe_allow_html=True,
@@ -460,7 +460,7 @@ def render_current_phase_details():
             st.write(current_phase["responsible"])
 
     with col3:
-        with st.container(border=True, height=250):
+        with st.container(border=True, height=150):
             st.markdown(
                 '<div class="detail-label">Entregável esperado</div>',
                 unsafe_allow_html=True,
